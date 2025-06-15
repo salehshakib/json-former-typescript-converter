@@ -1,29 +1,16 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  ClipboardPaste,
-  Indent,
-  FileJson,
-  Trash2,
-  AlignLeft,
-} from "lucide-react";
-import { ScrollArea } from "../ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { AlignLeft, ClipboardPaste, FileJson, Trash2 } from "lucide-react";
+import type { Dispatch, SetStateAction } from "react";
 
 interface JsonInputPanelProps {
   jsonInput: string;
@@ -45,7 +32,7 @@ export default function JsonInputPanel({
   onClear,
 }: JsonInputPanelProps) {
   return (
-    <Card className="flex-1 flex flex-col shadow-lg rounded-xl overflow-hidden">
+    <Card className=" flex flex-col shadow-lg rounded-xl overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">JSON Input</CardTitle>
@@ -96,7 +83,7 @@ export default function JsonInputPanel({
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="resize-none h-[65vh] text-sm bg-muted/30 border-input focus:ring-primary font-code scrollbar-thin"
+          className="resize-none h-[60vh] text-sm bg-muted/30 border-input focus:ring-primary font-code scrollbar-thin"
           aria-label="JSON Input Area"
         />
       </CardContent>

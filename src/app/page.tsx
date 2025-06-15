@@ -1,13 +1,12 @@
-
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import AppHeader from '@/components/json-former/app-header';
-import JsonInputPanel from '@/components/json-former/json-input-panel';
-import TypeScriptOutputPanel from '@/components/json-former/typescript-output-panel';
+import { useState, useEffect, useCallback } from "react";
+import AppHeader from "@/components/json-former/app-header";
+import JsonInputPanel from "@/components/json-former/json-input-panel";
+import TypeScriptOutputPanel from "@/components/json-former/typescript-output-panel";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { convertJsonToTs } from '@/lib/json-to-ts';
+import { convertJsonToTs } from "@/lib/json-to-ts";
 
 const EXAMPLE_JSON = {
   user: {
@@ -22,32 +21,33 @@ const EXAMPLE_JSON = {
       zipcode: "92998-3874",
       geo: {
         lat: "-37.3159",
-        lng: "81.1496"
-      }
+        lng: "81.1496",
+      },
     },
     phone: "1-770-736-8031 x56442",
     website: "hildegard.org",
     company: {
       name: "Romaguera-Crona",
       catchPhrase: "Multi-layered client-server neural-net",
-      bs: "harness real-time e-markets"
-    }
+      bs: "harness real-time e-markets",
+    },
   },
   posts: [
     {
       userId: 1,
       id: 1,
-      title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-      body: "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
-    }
+      title:
+        "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+      body: "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto",
+    },
   ],
   isActive: true,
-  tags: ["json", "typescript", "converter"]
+  tags: ["json", "typescript", "converter"],
 };
 
 export default function JsonFormerPage() {
-  const [jsonInput, setJsonInput] = useState<string>('');
-  const [tsOutput, setTsOutput] = useState<string>('');
+  const [jsonInput, setJsonInput] = useState<string>("");
+  const [tsOutput, setTsOutput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progressValue, setProgressValue] = useState<number>(0);
   const { toast } = useToast();
@@ -55,72 +55,71 @@ export default function JsonFormerPage() {
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
-     toast({
+    toast({
       title: "Example JSON Loaded",
       description: "The sample JSON has been loaded into the input area.",
     });
   };
 
-  const memoizedHandleConvert = useCallback(async (currentJsonInput: string) => {
-    if (!currentJsonInput.trim()) {
-      setTsOutput('');
-      setIsLoading(false);
-      setProgressValue(0);
-      return;
-    }
+  const memoizedHandleConvert = useCallback(
+    async (currentJsonInput: string) => {
+      if (!currentJsonInput.trim()) {
+        setTsOutput("");
+        setIsLoading(false);
+        setProgressValue(0);
+        return;
+      }
 
-    setIsLoading(true);
-    setTsOutput('');
-    setProgressValue(10); 
+      setIsLoading(true);
+      setTsOutput("");
+      setProgressValue(10);
 
-    const conversionResult = convertJsonToTs(currentJsonInput);
-    
-    await new Promise(resolve => setTimeout(resolve, 300)); 
-    setProgressValue(100);
+      const conversionResult = convertJsonToTs(currentJsonInput);
 
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setProgressValue(100);
 
-    if (conversionResult.error) {
-      toast({
-        title: "Conversion Error",
-        description: conversionResult.error,
-        variant: "destructive",
-      });
-      setTsOutput('');
-      setProgressValue(0); 
-      setIsLoading(false);
-      return;
-    }
-
-    setTsOutput(conversionResult.typescriptCode);
-    
-    if (conversionResult.typescriptCode) {
-         toast({
-            title: "Conversion Successful",
-            description: "JSON has been converted to TypeScript.",
+      if (conversionResult.error) {
+        toast({
+          title: "Conversion Error",
+          description: conversionResult.error,
+          variant: "destructive",
         });
-    }
+        setTsOutput("");
+        setProgressValue(0);
+        setIsLoading(false);
+        return;
+      }
 
-    setIsLoading(false);
+      setTsOutput(conversionResult.typescriptCode);
 
-  }, [toast, setTsOutput, setIsLoading, setProgressValue]);
+      if (conversionResult.typescriptCode) {
+        toast({
+          title: "Conversion Successful",
+          description: "JSON has been converted to TypeScript.",
+        });
+      }
 
+      setIsLoading(false);
+    },
+    [toast, setTsOutput, setIsLoading, setProgressValue]
+  );
 
   useEffect(() => {
-    const currentInput = jsonInput; 
+    const currentInput = jsonInput;
     if (!currentInput.trim()) {
-      memoizedHandleConvert(currentInput); 
+      memoizedHandleConvert(currentInput);
       return;
     }
-    
+
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput);
-    }, 750); 
+    }, 750);
 
     return () => {
       clearTimeout(handler);
     };
   }, [jsonInput, memoizedHandleConvert]);
-
 
   const handleDownloadTs = () => {
     if (!tsOutput.trim()) {
@@ -131,11 +130,13 @@ export default function JsonFormerPage() {
       });
       return;
     }
-    const blob = new Blob([tsOutput], { type: 'text/typescript;charset=utf-8' });
+    const blob = new Blob([tsOutput], {
+      type: "text/typescript;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'types.ts';
+    link.download = "types.ts";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -155,10 +156,11 @@ export default function JsonFormerPage() {
         description: "Content pasted from clipboard.",
       });
     } catch (err) {
-      console.error('Failed to read clipboard contents: ', err);
+      console.error("Failed to read clipboard contents: ", err);
       toast({
         title: "Paste Error",
-        description: "Could not paste from clipboard. Check permissions or try manually.",
+        description:
+          "Could not paste from clipboard. Check permissions or try manually.",
         variant: "destructive",
       });
     }
@@ -190,11 +192,11 @@ export default function JsonFormerPage() {
   };
 
   const handleClearJson = () => {
-    setJsonInput('');
-     toast({
-        title: "Input Cleared",
-        description: "JSON input has been cleared.",
-      });
+    setJsonInput("");
+    toast({
+      title: "Input Cleared",
+      description: "JSON input has been cleared.",
+    });
   };
 
   const handleCopyTs = async () => {
@@ -213,7 +215,7 @@ export default function JsonFormerPage() {
         description: "TypeScript code has been copied.",
       });
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
       toast({
         title: "Copy Error",
         description: "Could not copy to clipboard.",
@@ -222,16 +224,18 @@ export default function JsonFormerPage() {
     }
   };
 
-
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
       <AppHeader />
       {isLoading && (
-        <Progress value={progressValue} className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent" />
+        <Progress
+          value={progressValue}
+          className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
+        />
       )}
-      <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+      <main className=" container mx-auto p-4 md:p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
         <div className="w-full md:w-1/2 flex flex-col">
-          <JsonInputPanel 
+          <JsonInputPanel
             jsonInput={jsonInput}
             setJsonInput={setJsonInput}
             isLoading={isLoading}
@@ -251,7 +255,7 @@ export default function JsonFormerPage() {
           />
         </div>
       </main>
-      <footer className="py-4 text-center text-sm text-muted-foreground border-t">
+      <footer className="py-4 fixed bottom-0 left-0 right-0  text-center text-xs text-muted-foreground border-t">
         Crafted by Saleh Shakib with Firebase Studio.
       </footer>
     </div>

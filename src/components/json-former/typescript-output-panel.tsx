@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, Copy } from "lucide-react";
+import { Copy, Download } from "lucide-react";
 
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
@@ -29,7 +29,7 @@ export default function TypeScriptOutputPanel({
   const hasTsOutput = tsOutput.trim().length > 0;
 
   return (
-    <Card className="flex-1 flex flex-col shadow-lg rounded-xl overflow-hidden">
+    <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">
@@ -61,7 +61,7 @@ export default function TypeScriptOutputPanel({
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[65vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[60vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code
               className={`${
