@@ -55,6 +55,10 @@ export default function JsonFormerPage() {
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
+     toast({
+      title: "Example JSON Loaded",
+      description: "The sample JSON has been loaded into the input area.",
+    });
   };
 
   const memoizedHandleConvert = useCallback(async (currentJsonInput: string) => {
@@ -71,9 +75,8 @@ export default function JsonFormerPage() {
 
     const conversionResult = convertJsonToTs(currentJsonInput);
     
-    // Simulate progress for conversion
     await new Promise(resolve => setTimeout(resolve, 300)); 
-    setProgressValue(50);
+    setProgressValue(100);
 
 
     if (conversionResult.error) {
@@ -89,9 +92,7 @@ export default function JsonFormerPage() {
     }
 
     setTsOutput(conversionResult.typescriptCode);
-    setProgressValue(100); 
-
-    // Conversion successful toast
+    
     if (conversionResult.typescriptCode) {
          toast({
             title: "Conversion Successful",
@@ -106,13 +107,11 @@ export default function JsonFormerPage() {
 
   useEffect(() => {
     const currentInput = jsonInput; 
-    // If input is empty, clear everything and don't start conversion
     if (!currentInput.trim()) {
       memoizedHandleConvert(currentInput); 
       return;
     }
     
-    // Debounce logic
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput);
     }, 750); 
@@ -151,6 +150,10 @@ export default function JsonFormerPage() {
     try {
       const text = await navigator.clipboard.readText();
       setJsonInput(text);
+      toast({
+        title: "JSON Pasted",
+        description: "Content pasted from clipboard.",
+      });
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
       toast({
@@ -188,6 +191,10 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput('');
+     toast({
+        title: "Input Cleared",
+        description: "JSON input has been cleared.",
+      });
   };
 
   const handleCopyTs = async () => {
@@ -245,7 +252,7 @@ export default function JsonFormerPage() {
         </div>
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        Made with Firebase Studio by Saleh Shakib
+        Crafted by Saleh Shakib with Firebase Studio.
       </footer>
     </div>
   );
