@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -81,15 +80,15 @@ export default function JsonInputPanel({
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="h-[80vh] border rounded-md bg-muted/30">
-          <Textarea
-            value={jsonInput}
-            onChange={(e) => setJsonInput(e.target.value)}
-            placeholder='{ "name": "JSONFormer", "version": 1 }'
-            className="resize-none text-sm bg-transparent border-0 focus:ring-0 font-code scrollbar-thin h-full w-full"
-            aria-label="JSON Input Area"
-          />
-        </ScrollArea>
+        {/* <ScrollArea className="h-[80vh] border rounded-md bg-muted/30"> */}
+        <Textarea
+          value={jsonInput}
+          onChange={(e) => setJsonInput(e.target.value)}
+          placeholder='{ "name": "JSONFormer", "version": 1 }'
+          className="resize-none h-[80vh] scrollbar-thin outline-none text-sm border rounded-md bg-muted/30 focus:ring-0 font-code   w-full"
+          aria-label="JSON Input Area"
+        />
+        {/* </ScrollArea> */}
       </CardContent>
     </Card>
   );
