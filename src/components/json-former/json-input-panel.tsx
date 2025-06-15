@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { AlignLeft, ClipboardPaste, FileJson, Trash2 } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface JsonInputPanelProps {
   jsonInput: string;
@@ -32,7 +34,7 @@ export default function JsonInputPanel({
   onClear,
 }: JsonInputPanelProps) {
   return (
-    <Card className=" flex flex-col shadow-lg rounded-xl overflow-hidden">
+    <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden h-full">
       <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">JSON Input</CardTitle>
@@ -78,14 +80,16 @@ export default function JsonInputPanel({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0">
-        <Textarea
-          value={jsonInput}
-          onChange={(e) => setJsonInput(e.target.value)}
-          placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="resize-none h-[70vh] text-sm bg-muted/30 border-input focus:ring-primary font-code scrollbar-thin"
-          aria-label="JSON Input Area"
-        />
+      <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
+        <ScrollArea className="h-[80vh] border rounded-md bg-muted/30">
+          <Textarea
+            value={jsonInput}
+            onChange={(e) => setJsonInput(e.target.value)}
+            placeholder='{ "name": "JSONFormer", "version": 1 }'
+            className="resize-none text-sm bg-transparent border-0 focus:ring-0 font-code scrollbar-thin h-full w-full"
+            aria-label="JSON Input Area"
+          />
+        </ScrollArea>
       </CardContent>
     </Card>
   );
