@@ -218,7 +218,7 @@ export default function JsonFormerPage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="h-screen flex flex-col bg-background text-foreground">
       <AppHeader />
       {isLoading && (
         <Progress value={progressValue} className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent" />
@@ -240,8 +240,7 @@ export default function JsonFormerPage() {
             tsOutput={tsOutput}
             onDownload={handleDownloadTs}
             onCopy={handleCopyTs}
-            isLoading={isLoading}
-          />
+            isLoading={isLoading} progressValue={0}          />
         </div>
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">

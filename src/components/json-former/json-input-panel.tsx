@@ -36,13 +36,13 @@ export default function JsonInputPanel({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={onPaste} disabled={isLoading} aria-label="Paste JSON from clipboard">
-              <ClipboardPaste className="h-4 w-4 mr-2" /> Paste
+              <ClipboardPaste className="h-4 w-4 " /> 
             </Button>
             <Button variant="outline" size="sm" onClick={onFormat} disabled={isLoading || !jsonInput.trim()} aria-label="Format JSON">
-              <AlignLeft className="h-4 w-4 mr-2" /> Format
+              <AlignLeft className="h-4 w-4 " /> 
             </Button>
             <Button variant="outline" size="sm" onClick={onLoadExample} disabled={isLoading} aria-label="Load example JSON">
-              <FileJson className="h-4 w-4 mr-2" /> Load Example
+              <FileJson className="h-4 w-4 " /> 
             </Button>
             <Button 
               variant="outline" 
@@ -52,7 +52,7 @@ export default function JsonInputPanel({
               aria-label="Clear JSON input" 
               className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/50 focus-visible:ring-destructive"
             >
-              <Trash2 className="h-4 w-4 mr-2" /> Clear
+              <Trash2 className="h-4 w-4 " />
             </Button>
         </div>
       </CardHeader>
@@ -61,7 +61,7 @@ export default function JsonInputPanel({
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="resize-none h-[80vh] text-sm bg-muted/30 border-input focus:ring-primary font-code"
+          className="resize-none h-[67vh] text-sm bg-muted/30 border-input focus:ring-primary font-code"
           aria-label="JSON Input Area"
         />
       </CardContent>

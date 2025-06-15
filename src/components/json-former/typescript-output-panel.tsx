@@ -32,15 +32,15 @@ export default function TypeScriptOutputPanel({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={onCopy} disabled={isLoading || !hasTsOutput} aria-label="Copy TypeScript code">
-              <Copy className="h-4 w-4 mr-2" /> Copy Code
+              <Copy className="h-4 w-4 " /> 
             </Button>
             <Button variant="outline" size="sm" onClick={onDownload} disabled={isLoading || !hasTsOutput} aria-label="Download TypeScript file">
-              <Download className="h-4 w-4 mr-2" /> Download .ts
+              <Download className="h-4 w-4 " /> 
             </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[80vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[67vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code className={`${!hasTsOutput && !isLoading ? 'text-muted-foreground' : ''} h-full block`}>
               {isLoading && !hasTsOutput ? "Generating TypeScript..." : 
