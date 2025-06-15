@@ -13,6 +13,7 @@ interface TypeScriptOutputPanelProps {
   onDownload: () => void;
   onCopy: () => void;
   isLoading: boolean;
+  progressValue: number; // Added progressValue
 }
 
 export default function TypeScriptOutputPanel({ 
@@ -20,7 +21,8 @@ export default function TypeScriptOutputPanel({
   aiSuggestions, 
   onDownload, 
   onCopy,
-  isLoading 
+  isLoading,
+  progressValue // Destructure progressValue
 }: TypeScriptOutputPanelProps) {
   const hasTsOutput = tsOutput.trim().length > 0;
   const hasAiSuggestions = aiSuggestions.trim().length > 0;

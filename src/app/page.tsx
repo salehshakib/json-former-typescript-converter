@@ -247,6 +247,7 @@ export default function JsonFormerPage() {
             onDownload={handleDownloadTs}
             onCopy={handleCopyTs}
             isLoading={isLoading}
+            progressValue={progressValue} // Pass progressValue here
           />
         </div>
       </main>
