@@ -11,9 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Copy, Download, Code, FileType } from "lucide-react";
+import { Copy, Download, FileJson2, Type } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import type { OutputFormat } from "@/app/page";
 
 interface TypeScriptOutputPanelProps {
@@ -48,35 +47,37 @@ export default function TypeScriptOutputPanel({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center space-x-2 mr-2">
-            <FileType className="h-4 w-4 text-muted-foreground" />
+            <FileJson2 className="h-5 w-5 text-muted-foreground" aria-label="Interface format" />
             <Switch
               id="output-format-switch"
-              checked={outputFormat === "type"} // Switch is ON if format is "type"
+              checked={outputFormat === "type"} 
               onCheckedChange={(checked) =>
-                setOutputFormat(checked ? "type" : "interface") // If checked (ON) -> "type", else "interface"
+                setOutputFormat(checked ? "type" : "interface") 
               }
-              aria-label="Toggle output format between Type and Interface"
+              aria-label="Toggle output format between Interface (off) and Type (on)"
               disabled={isLoading}
             />
-            <Code className="h-4 w-4 text-muted-foreground" />
+            <Type className="h-5 w-5 text-muted-foreground" aria-label="Type alias format" />
           </div>
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={onCopy}
             disabled={isLoading || !hasTsOutput}
             aria-label="Copy TypeScript code"
+            title="Copy TypeScript"
           >
-            <Copy className="mr-1 h-3.5 w-3.5" /> Copy
+            <Copy className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={onDownload}
             disabled={isLoading || !hasTsOutput}
             aria-label="Download TypeScript file"
+            title="Download TypeScript"
           >
-            <Download className="mr-1 h-3.5 w-3.5" /> Download
+            <Download className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
