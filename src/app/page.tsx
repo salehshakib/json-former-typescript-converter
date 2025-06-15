@@ -55,7 +55,6 @@ export default function JsonFormerPage() {
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
-    // No toast here, conversion will trigger feedback if successful or not
   };
 
   const memoizedHandleConvert = useCallback(async (currentJsonInput: string) => {
@@ -72,6 +71,11 @@ export default function JsonFormerPage() {
 
     const conversionResult = convertJsonToTs(currentJsonInput);
     
+    // Simulate progress for conversion
+    await new Promise(resolve => setTimeout(resolve, 300)); // Short delay for UX
+    setProgressValue(50);
+
+
     if (conversionResult.error) {
       toast({
         title: "Conversion Error",
@@ -87,16 +91,31 @@ export default function JsonFormerPage() {
     setTsOutput(conversionResult.typescriptCode);
     setProgressValue(100); 
 
+    // Conversion successful toast
+    if (conversionResult.typescriptCode) {
+         toast({
+            title: "Conversion Successful",
+            description: "JSON has been converted to TypeScript.",
+        });
+    }
+
     setIsLoading(false);
 
-  }, [toast, setTsOutput, setIsLoading, setProgressValue, convertJsonToTs]);
+  }, [toast, setTsOutput, setIsLoading, setProgressValue]);
 
 
   useEffect(() => {
     const currentInput = jsonInput; 
+    // If input is empty, clear everything and don't start conversion
+    if (!currentInput.trim()) {
+      memoizedHandleConvert(currentInput); // This will clear outputs
+      return;
+    }
+    
+    // Debounce logic
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput);
-    }, 750); 
+    }, 750); // Convert 750ms after user stops typing
 
     return () => {
       clearTimeout(handler);
@@ -132,7 +151,6 @@ export default function JsonFormerPage() {
     try {
       const text = await navigator.clipboard.readText();
       setJsonInput(text);
-      // Toasting here might be redundant if conversion auto-triggers
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
       toast({
@@ -170,7 +188,7 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput('');
-    // No toast needed here as the UI will clear, and conversion will clear output.
+    // Outputs will be cleared by the useEffect watching jsonInput
   };
 
   const handleCopyTs = async () => {
@@ -232,3 +250,4 @@ export default function JsonFormerPage() {
     </div>
   );
 }
+
