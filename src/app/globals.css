@@ -113,4 +113,25 @@ body {
   code, pre {
     @apply font-code;
   }
+.scrollbar-thin::-webkit-scrollbar {
+  width: 7px;
+  height: 6px;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar,
+.scrollbar-thin:active::-webkit-scrollbar,
+.scrollbar-thin:focus::-webkit-scrollbar {
+  width: 7px; /* Show scrollbar on hover, focus, or active */
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+}
+.scrollbar-thin:hover::-webkit-scrollbar-thumb,
+.scrollbar-thin:active::-webkit-scrollbar-thumb,
+.scrollbar-thin:focus::-webkit-scrollbar-thumb {
+ background-color: hsl(var(--border));
+
+}
 }

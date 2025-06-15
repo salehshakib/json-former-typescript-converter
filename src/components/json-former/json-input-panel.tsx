@@ -1,12 +1,29 @@
-
 "use client";
 
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ClipboardPaste, Indent, FileJson, Trash2, AlignLeft } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  ClipboardPaste,
+  Indent,
+  FileJson,
+  Trash2,
+  AlignLeft,
+} from "lucide-react";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface JsonInputPanelProps {
   jsonInput: string;
@@ -18,14 +35,14 @@ interface JsonInputPanelProps {
   onClear: () => void;
 }
 
-export default function JsonInputPanel({ 
-  jsonInput, 
-  setJsonInput, 
+export default function JsonInputPanel({
+  jsonInput,
+  setJsonInput,
   isLoading,
   onPaste,
   onFormat,
   onLoadExample,
-  onClear
+  onClear,
 }: JsonInputPanelProps) {
   return (
     <Card className="flex-1 flex flex-col shadow-lg rounded-xl overflow-hidden">
@@ -35,25 +52,43 @@ export default function JsonInputPanel({
           <CardDescription>Paste, type, or load example JSON.</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={onPaste} disabled={isLoading} aria-label="Paste JSON from clipboard">
-              <ClipboardPaste className="h-4 w-4 " /> 
-            </Button>
-            <Button variant="outline" size="sm" onClick={onFormat} disabled={isLoading || !jsonInput.trim()} aria-label="Format JSON">
-              <AlignLeft className="h-4 w-4 " /> 
-            </Button>
-            <Button variant="outline" size="sm" onClick={onLoadExample} disabled={isLoading} aria-label="Load example JSON">
-              <FileJson className="h-4 w-4 " /> 
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onClear} 
-              disabled={isLoading || !jsonInput.trim()} 
-              aria-label="Clear JSON input" 
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/50 focus-visible:ring-destructive"
-            >
-              <Trash2 className="h-4 w-4 " />
-            </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPaste}
+            disabled={isLoading}
+            aria-label="Paste JSON from clipboard"
+          >
+            <ClipboardPaste className="h-4 w-4 " />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onFormat}
+            disabled={isLoading || !jsonInput.trim()}
+            aria-label="Format JSON"
+          >
+            <AlignLeft className="h-4 w-4 " />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onLoadExample}
+            disabled={isLoading}
+            aria-label="Load example JSON"
+          >
+            <FileJson className="h-4 w-4 " />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClear}
+            disabled={isLoading || !jsonInput.trim()}
+            aria-label="Clear JSON input"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/50 focus-visible:ring-destructive"
+          >
+            <Trash2 className="h-4 w-4 " />
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0">
@@ -61,7 +96,7 @@ export default function JsonInputPanel({
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="resize-none h-[66vh] text-sm bg-muted/30 border-input focus:ring-primary font-code"
+          className="resize-none h-[65vh] text-sm bg-muted/30 border-input focus:ring-primary font-code scrollbar-thin"
           aria-label="JSON Input Area"
         />
       </CardContent>
