@@ -55,27 +55,23 @@ export default function JsonFormerPage() {
   const { toast } = useToast();
 
   const handleLoadExampleJson = () => {
-    setJsonInput(JSON.stringify(EXAMPLE_JSON, null, 2));
+    const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
+    setJsonInput(exampleJsonString);
+    // Conversion will be triggered by useEffect watching jsonInput
     toast({
       title: "Example Loaded",
-      description: "Sample JSON has been loaded into the input area.",
+      description: "Sample JSON has been loaded.",
     });
   };
 
-  useEffect(() => {
-    // Load example JSON on initial mount
-    handleLoadExampleJson();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-
   const handleConvert = async () => {
     if (!jsonInput.trim()) {
-      toast({
-        title: "Input Error",
-        description: "JSON input cannot be empty.",
-        variant: "destructive",
-      });
+      // This case should ideally be handled by the useEffect clearing outputs
+      // but as a safeguard or if called directly:
+      setTsOutput('');
+      setAiSuggestions('');
+      setIsLoading(false);
+      setProgressValue(0);
       return;
     }
 
@@ -84,7 +80,7 @@ export default function JsonFormerPage() {
     setAiSuggestions('');
     setProgressValue(10);
 
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 200)); // Simulate initial processing
     setProgressValue(30);
 
     const conversionResult = convertJsonToTs(jsonInput);
@@ -95,6 +91,8 @@ export default function JsonFormerPage() {
         description: conversionResult.error,
         variant: "destructive",
       });
+      setTsOutput(''); // Clear TS output on error
+      setAiSuggestions(''); // Clear AI suggestions on error
       setIsLoading(false);
       setProgressValue(0);
       return;
@@ -117,16 +115,37 @@ export default function JsonFormerPage() {
           description: "Failed to get AI suggestions. Please try again later.",
           variant: "destructive",
         });
-        setProgressValue(100);
+        setProgressValue(100); 
       }
     } else {
        setProgressValue(100);
     }
     
-    setTimeout(() => {
+    setTimeout(() => { // Ensure progress bar completes before hiding
       setIsLoading(false);
     }, 500);
   };
+
+  // Debounced effect for automatic conversion
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (jsonInput.trim()) {
+        handleConvert();
+      } else {
+        // Clear outputs if input is empty
+        setTsOutput('');
+        setAiSuggestions('');
+        setIsLoading(false);
+        setProgressValue(0);
+      }
+    }, 750); // 750ms debounce
+
+    return () => {
+      clearTimeout(handler);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jsonInput]);
+
 
   const handleDownloadTs = () => {
     if (!tsOutput.trim()) {
@@ -155,7 +174,7 @@ export default function JsonFormerPage() {
   const handlePasteJson = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setJsonInput(text);
+      setJsonInput(text); // This will trigger the debounced conversion
       toast({
         title: "Pasted from Clipboard",
         description: "JSON input has been updated.",
@@ -171,9 +190,17 @@ export default function JsonFormerPage() {
   };
 
   const handleFormatJson = () => {
+    if (!jsonInput.trim()) {
+      toast({
+        title: "Format Error",
+        description: "Nothing to format. JSON input is empty.",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
       const parsedJson = JSON.parse(jsonInput);
-      setJsonInput(JSON.stringify(parsedJson, null, 2));
+      setJsonInput(JSON.stringify(parsedJson, null, 2)); // This will trigger debounced conversion
       toast({
         title: "JSON Formatted",
         description: "The JSON input has been beautified.",
@@ -188,7 +215,7 @@ export default function JsonFormerPage() {
   };
 
   const handleClearJson = () => {
-    setJsonInput('');
+    setJsonInput(''); // This will trigger the debounced effect to clear outputs
     toast({
       title: "Input Cleared",
       description: "JSON input area has been cleared.",
@@ -232,7 +259,6 @@ export default function JsonFormerPage() {
           <JsonInputPanel 
             jsonInput={jsonInput}
             setJsonInput={setJsonInput}
-            onConvert={handleConvert}
             isLoading={isLoading}
             onPaste={handlePasteJson}
             onFormat={handleFormatJson}
@@ -247,7 +273,7 @@ export default function JsonFormerPage() {
             onDownload={handleDownloadTs}
             onCopy={handleCopyTs}
             isLoading={isLoading}
-            progressValue={progressValue} // Pass progressValue here
+            progressValue={progressValue}
           />
         </div>
       </main>
@@ -257,3 +283,4 @@ export default function JsonFormerPage() {
     </div>
   );
 }
+

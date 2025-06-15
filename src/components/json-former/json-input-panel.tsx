@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Zap, ClipboardPaste, Indent, FileJson, Trash2 } from "lucide-react";
+import { ClipboardPaste, Indent, FileJson, Trash2 } from "lucide-react";
 
 interface JsonInputPanelProps {
   jsonInput: string;
   setJsonInput: Dispatch<SetStateAction<string>>;
-  onConvert: () => void;
   isLoading: boolean;
   onPaste: () => void;
   onFormat: () => void;
@@ -22,7 +21,6 @@ interface JsonInputPanelProps {
 export default function JsonInputPanel({ 
   jsonInput, 
   setJsonInput, 
-  onConvert, 
   isLoading,
   onPaste,
   onFormat,
@@ -31,27 +29,27 @@ export default function JsonInputPanel({
 }: JsonInputPanelProps) {
   return (
     <Card className="flex-1 flex flex-col shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">JSON Input</CardTitle>
           <CardDescription>Paste, type, or load example JSON.</CardDescription>
         </div>
         <TooltipProvider>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 flex-wrap">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onPaste} disabled={isLoading} aria-label="Paste JSON from clipboard">
-                  <ClipboardPaste className="h-5 w-5" />
+                <Button variant="outline" size="sm" onClick={onPaste} disabled={isLoading} aria-label="Paste JSON from clipboard">
+                  <ClipboardPaste className="mr-2 h-4 w-4" /> Paste
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Paste</p>
+                <p>Paste from clipboard</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onFormat} disabled={isLoading || !jsonInput.trim()} aria-label="Format JSON">
-                  <Indent className="h-5 w-5" />
+                <Button variant="outline" size="sm" onClick={onFormat} disabled={isLoading || !jsonInput.trim()} aria-label="Format JSON">
+                  <Indent className="mr-2 h-4 w-4" /> Format
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -60,18 +58,18 @@ export default function JsonInputPanel({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onLoadExample} disabled={isLoading} aria-label="Load example JSON">
-                  <FileJson className="h-5 w-5" />
+                <Button variant="outline" size="sm" onClick={onLoadExample} disabled={isLoading} aria-label="Load example JSON">
+                  <FileJson className="mr-2 h-4 w-4" /> Example
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Load Example</p>
+                <p>Load Example JSON</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onClear} disabled={isLoading || !jsonInput.trim()} aria-label="Clear JSON input">
-                  <Trash2 className="h-5 w-5 text-destructive/80 hover:text-destructive" />
+                <Button variant="outline" size="sm" onClick={onClear} disabled={isLoading || !jsonInput.trim()} aria-label="Clear JSON input" className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/50">
+                  <Trash2 className="mr-2 h-4 w-4" /> Clear
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -86,19 +84,11 @@ export default function JsonInputPanel({
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="flex-1 resize-none min-h-[400px] md:min-h-[500px] lg:min-h-[calc(100vh-360px)] text-sm bg-muted/30 border-input focus:ring-primary font-code"
+          className="flex-1 resize-none min-h-[400px] md:min-h-[500px] lg:min-h-[calc(100vh-320px)] text-sm bg-muted/30 border-input focus:ring-primary font-code"
           aria-label="JSON Input Area"
         />
-        <Button 
-          onClick={onConvert} 
-          disabled={isLoading || !jsonInput.trim()}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-          aria-label="Convert JSON to TypeScript"
-        >
-          <Zap className="mr-2 h-5 w-5" />
-          Convert to TypeScript
-        </Button>
       </CardContent>
     </Card>
   );
 }
+
