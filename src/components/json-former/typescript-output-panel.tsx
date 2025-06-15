@@ -47,17 +47,17 @@ export default function TypeScriptOutputPanel({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center space-x-2 mr-2">
-            <FileJson2 className="h-5 w-5 text-muted-foreground" aria-label="Interface format" />
+            <FileJson2 className="h-5 w-5 text-muted-foreground" aria-label="Interface format" title="Interface" />
             <Switch
               id="output-format-switch"
-              checked={outputFormat === "type"} 
+              checked={outputFormat === "type"}
               onCheckedChange={(checked) =>
-                setOutputFormat(checked ? "type" : "interface") 
+                setOutputFormat(checked ? "type" : "interface")
               }
               aria-label="Toggle output format between Interface (off) and Type (on)"
               disabled={isLoading}
             />
-            <Type className="h-5 w-5 text-muted-foreground" aria-label="Type alias format" />
+            <Type className="h-5 w-5 text-muted-foreground" aria-label="Type alias format" title="Type Alias"/>
           </div>
           <Button
             variant="outline"
@@ -82,7 +82,7 @@ export default function TypeScriptOutputPanel({
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="border rounded-md bg-muted/30 h-[70vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 h-[80vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code
               className={`${
