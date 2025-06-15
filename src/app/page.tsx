@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AppHeader from '@/components/json-former/app-header';
 import JsonInputPanel from '@/components/json-former/json-input-panel';
 import TypeScriptOutputPanel from '@/components/json-former/typescript-output-panel';
@@ -57,17 +57,14 @@ export default function JsonFormerPage() {
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
-    // Conversion will be triggered by useEffect watching jsonInput
     toast({
       title: "Example Loaded",
-      description: "Sample JSON has been loaded.",
+      description: "Sample JSON has been loaded into the input area.",
     });
   };
 
-  const handleConvert = async () => {
-    if (!jsonInput.trim()) {
-      // This case should ideally be handled by the useEffect clearing outputs
-      // but as a safeguard or if called directly:
+  const memoizedHandleConvert = useCallback(async (currentJsonInput: string) => {
+    if (!currentJsonInput.trim()) {
       setTsOutput('');
       setAiSuggestions('');
       setIsLoading(false);
@@ -78,73 +75,74 @@ export default function JsonFormerPage() {
     setIsLoading(true);
     setTsOutput('');
     setAiSuggestions('');
-    setProgressValue(10);
+    setProgressValue(10); // Initial progress
 
-    await new Promise(resolve => setTimeout(resolve, 200)); // Simulate initial processing
-    setProgressValue(30);
+    // Artificial delay for UX, can be adjusted or removed
+    // await new Promise(resolve => setTimeout(resolve, 100)); 
+    // setProgressValue(20);
 
-    const conversionResult = convertJsonToTs(jsonInput);
 
+    const conversionResult = convertJsonToTs(currentJsonInput);
+    // await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
+    
     if (conversionResult.error) {
       toast({
         title: "Conversion Error",
         description: conversionResult.error,
         variant: "destructive",
       });
-      setTsOutput(''); // Clear TS output on error
-      setAiSuggestions(''); // Clear AI suggestions on error
+      setTsOutput('');
+      setAiSuggestions('');
+      setProgressValue(0); // Reset progress on error
       setIsLoading(false);
-      setProgressValue(0);
       return;
     }
 
     setTsOutput(conversionResult.typescriptCode);
-    setProgressValue(60);
+    setProgressValue(60); // Progress after TS conversion
 
     if (conversionResult.typescriptCode) {
       try {
-        setProgressValue(70);
+        // await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
+        setProgressValue(70); // Progress before AI call
         const aiResult = await suggestTypescriptImprovements({ typescriptCode: conversionResult.typescriptCode });
         setAiSuggestions(aiResult.suggestions);
-        setProgressValue(100);
+        setProgressValue(100); // Progress after AI suggestions
       } catch (aiError: any) {
         console.error("AI Suggestion Error:", aiError);
-        setAiSuggestions("Could not fetch AI suggestions at this time.");
+        setAiSuggestions("Could not fetch AI suggestions at this time."); // Provide direct feedback
         toast({
           title: "AI Suggestion Error",
           description: "Failed to get AI suggestions. Please try again later.",
           variant: "destructive",
         });
-        setProgressValue(100); 
+        setProgressValue(100); // Still complete progress visually
       }
     } else {
-       setProgressValue(100);
+      // No TS code to get suggestions for, but conversion was successful (empty JSON likely)
+      setAiSuggestions(''); // Ensure AI suggestions are cleared
+      setProgressValue(100); // Complete progress
     }
     
-    setTimeout(() => { // Ensure progress bar completes before hiding
-      setIsLoading(false);
-    }, 500);
-  };
+    // Short delay to allow progress bar to show 100% before hiding
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    // }, 300);
+    setIsLoading(false);
 
-  // Debounced effect for automatic conversion
+  }, [toast, setTsOutput, setAiSuggestions, setIsLoading, setProgressValue, convertJsonToTs, suggestTypescriptImprovements]);
+
+
   useEffect(() => {
+    const currentInput = jsonInput; // Capture current jsonInput for the debounced call
     const handler = setTimeout(() => {
-      if (jsonInput.trim()) {
-        handleConvert();
-      } else {
-        // Clear outputs if input is empty
-        setTsOutput('');
-        setAiSuggestions('');
-        setIsLoading(false);
-        setProgressValue(0);
-      }
+      memoizedHandleConvert(currentInput);
     }, 750); // 750ms debounce
 
     return () => {
       clearTimeout(handler);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jsonInput]);
+  }, [jsonInput, memoizedHandleConvert]);
 
 
   const handleDownloadTs = () => {
@@ -174,7 +172,7 @@ export default function JsonFormerPage() {
   const handlePasteJson = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setJsonInput(text); // This will trigger the debounced conversion
+      setJsonInput(text);
       toast({
         title: "Pasted from Clipboard",
         description: "JSON input has been updated.",
@@ -200,7 +198,7 @@ export default function JsonFormerPage() {
     }
     try {
       const parsedJson = JSON.parse(jsonInput);
-      setJsonInput(JSON.stringify(parsedJson, null, 2)); // This will trigger debounced conversion
+      setJsonInput(JSON.stringify(parsedJson, null, 2));
       toast({
         title: "JSON Formatted",
         description: "The JSON input has been beautified.",
@@ -215,7 +213,7 @@ export default function JsonFormerPage() {
   };
 
   const handleClearJson = () => {
-    setJsonInput(''); // This will trigger the debounced effect to clear outputs
+    setJsonInput('');
     toast({
       title: "Input Cleared",
       description: "JSON input area has been cleared.",
@@ -283,4 +281,3 @@ export default function JsonFormerPage() {
     </div>
   );
 }
-
