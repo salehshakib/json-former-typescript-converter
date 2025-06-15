@@ -40,7 +40,7 @@ export default function TypeScriptOutputPanel({
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[67vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[66vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code className={`${!hasTsOutput && !isLoading ? 'text-muted-foreground' : ''} h-full block`}>
               {isLoading && !hasTsOutput ? "Generating TypeScript..." : 
