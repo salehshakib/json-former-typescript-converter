@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -45,11 +46,14 @@ const EXAMPLE_JSON = {
   tags: ["json", "typescript", "converter"],
 };
 
+export type OutputFormat = "interface" | "type";
+
 export default function JsonFormerPage() {
   const [jsonInput, setJsonInput] = useState<string>("");
   const [tsOutput, setTsOutput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progressValue, setProgressValue] = useState<number>(0);
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>("interface");
   const { toast } = useToast();
 
   const handleLoadExampleJson = () => {
@@ -62,7 +66,7 @@ export default function JsonFormerPage() {
   };
 
   const memoizedHandleConvert = useCallback(
-    async (currentJsonInput: string) => {
+    async (currentJsonInput: string, currentOutputFormat: OutputFormat) => {
       if (!currentJsonInput.trim()) {
         setTsOutput("");
         setIsLoading(false);
@@ -72,12 +76,14 @@ export default function JsonFormerPage() {
 
       setIsLoading(true);
       setTsOutput("");
-      setProgressValue(10);
+      setProgressValue(10); // Initial progress
 
-      const conversionResult = convertJsonToTs(currentJsonInput);
+      const conversionResult = convertJsonToTs(currentJsonInput, "RootObject", currentOutputFormat);
 
+      // Simulate conversion time
       await new Promise((resolve) => setTimeout(resolve, 300));
       setProgressValue(100);
+
 
       if (conversionResult.error) {
         toast({
@@ -94,32 +100,37 @@ export default function JsonFormerPage() {
       setTsOutput(conversionResult.typescriptCode);
 
       if (conversionResult.typescriptCode) {
-        toast({
+         toast({
           title: "Conversion Successful",
-          description: "JSON has been converted to TypeScript.",
+          description: `JSON has been converted to TypeScript ${currentOutputFormat}s.`,
         });
       }
-
       setIsLoading(false);
     },
-    [toast, setTsOutput, setIsLoading, setProgressValue]
+    [toast] 
   );
 
   useEffect(() => {
     const currentInput = jsonInput;
+    const currentFormat = outputFormat;
+    // If input is empty, clear everything and return
     if (!currentInput.trim()) {
-      memoizedHandleConvert(currentInput);
+      memoizedHandleConvert(currentInput, currentFormat); // This will clear outputs
       return;
     }
 
+    // Debounce mechanism
     const handler = setTimeout(() => {
-      memoizedHandleConvert(currentInput);
-    }, 750);
+      memoizedHandleConvert(currentInput, currentFormat);
+    }, 750); // Adjust delay as needed
 
+    // Cleanup function to clear timeout if input changes before delay,
+    // or if component unmounts.
     return () => {
       clearTimeout(handler);
     };
-  }, [jsonInput, memoizedHandleConvert]);
+  }, [jsonInput, outputFormat, memoizedHandleConvert]);
+
 
   const handleDownloadTs = () => {
     if (!tsOutput.trim()) {
@@ -136,14 +147,15 @@ export default function JsonFormerPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "types.ts";
+    const filename = outputFormat === 'interface' ? 'interfaces.ts' : 'types.ts';
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     toast({
       title: "Download Started",
-      description: "types.ts is being downloaded.",
+      description: `${filename} is being downloaded.`,
     });
   };
 
@@ -233,7 +245,7 @@ export default function JsonFormerPage() {
           className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
         />
       )}
-      <main className=" container mx-auto p-4 md:p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+      <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch flex-1 min-h-0">
         <div className="w-full md:w-1/2 flex flex-col">
           <JsonInputPanel
             jsonInput={jsonInput}
@@ -251,11 +263,12 @@ export default function JsonFormerPage() {
             onDownload={handleDownloadTs}
             onCopy={handleCopyTs}
             isLoading={isLoading}
-            progressValue={progressValue}
+            outputFormat={outputFormat}
+            setOutputFormat={setOutputFormat}
           />
         </div>
       </main>
-      <footer className="py-4 fixed bottom-0 left-0 right-0  text-center text-xs text-muted-foreground border-t">
+      <footer className="py-4 text-center text-xs text-muted-foreground border-t">
         Crafted by Saleh Shakib with Firebase Studio.
       </footer>
     </div>
