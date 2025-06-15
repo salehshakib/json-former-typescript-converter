@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -78,12 +77,15 @@ export default function JsonFormerPage() {
       setTsOutput("");
       setProgressValue(10); // Initial progress
 
-      const conversionResult = convertJsonToTs(currentJsonInput, "RootObject", currentOutputFormat);
+      const conversionResult = convertJsonToTs(
+        currentJsonInput,
+        "RootObject",
+        currentOutputFormat
+      );
 
       // Simulate conversion time
       await new Promise((resolve) => setTimeout(resolve, 300));
       setProgressValue(100);
-
 
       if (conversionResult.error) {
         toast({
@@ -100,14 +102,14 @@ export default function JsonFormerPage() {
       setTsOutput(conversionResult.typescriptCode);
 
       if (conversionResult.typescriptCode) {
-         toast({
+        toast({
           title: "Conversion Successful",
           description: `JSON has been converted to TypeScript ${currentOutputFormat}s.`,
         });
       }
       setIsLoading(false);
     },
-    [toast] 
+    [toast]
   );
 
   useEffect(() => {
@@ -131,7 +133,6 @@ export default function JsonFormerPage() {
     };
   }, [jsonInput, outputFormat, memoizedHandleConvert]);
 
-
   const handleDownloadTs = () => {
     if (!tsOutput.trim()) {
       toast({
@@ -147,7 +148,8 @@ export default function JsonFormerPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const filename = outputFormat === 'interface' ? 'interfaces.ts' : 'types.ts';
+    const filename =
+      outputFormat === "interface" ? "interfaces.ts" : "types.ts";
     link.download = filename;
     document.body.appendChild(link);
     link.click();
@@ -245,7 +247,7 @@ export default function JsonFormerPage() {
           className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
         />
       )}
-      <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch flex-1 min-h-0">
+      <main className="container mx-auto p-4 md:p-6 lg:p-8  flex flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0">
         <div className="w-full md:w-1/2 flex flex-col">
           <JsonInputPanel
             jsonInput={jsonInput}
@@ -268,9 +270,9 @@ export default function JsonFormerPage() {
           />
         </div>
       </main>
-      <footer className="py-4 text-center text-xs text-muted-foreground border-t">
+      {/* <footer className="py-4 text-center text-xs text-muted-foreground border-t ">
         Crafted by Saleh Shakib with Firebase Studio.
-      </footer>
+      </footer> */}
     </div>
   );
 }

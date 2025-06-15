@@ -16,7 +16,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import type { OutputFormat } from "@/app/page";
 
-
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
   onDownload: () => void;
@@ -39,7 +38,7 @@ export default function TypeScriptOutputPanel({
   return (
     <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden h-full">
       <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
-        <div className="flex-1">
+        <div>
           <CardTitle className="text-2xl font-headline">
             TypeScript Output
           </CardTitle>
@@ -50,16 +49,16 @@ export default function TypeScriptOutputPanel({
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center space-x-2 mr-2">
             <FileType className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="output-format-switch" className="text-sm">Type</Label>
             <Switch
               id="output-format-switch"
-              checked={outputFormat === 'interface'}
-              onCheckedChange={(checked) => setOutputFormat(checked ? 'interface' : 'type')}
+              checked={outputFormat === "type"} // Switch is ON if format is "type"
+              onCheckedChange={(checked) =>
+                setOutputFormat(checked ? "type" : "interface") // If checked (ON) -> "type", else "interface"
+              }
               aria-label="Toggle output format between Type and Interface"
               disabled={isLoading}
             />
-            <Label htmlFor="output-format-switch" className="text-sm">Interface</Label>
-             <Code className="h-4 w-4 text-muted-foreground" />
+            <Code className="h-4 w-4 text-muted-foreground" />
           </div>
           <Button
             variant="outline"
@@ -67,10 +66,8 @@ export default function TypeScriptOutputPanel({
             onClick={onCopy}
             disabled={isLoading || !hasTsOutput}
             aria-label="Copy TypeScript code"
-            className="gap-1.5"
           >
-            <Copy className="h-4 w-4" />
-            Copy
+            <Copy className="mr-1 h-3.5 w-3.5" /> Copy
           </Button>
           <Button
             variant="outline"
@@ -78,15 +75,13 @@ export default function TypeScriptOutputPanel({
             onClick={onDownload}
             disabled={isLoading || !hasTsOutput}
             aria-label="Download TypeScript file"
-            className="gap-1.5"
           >
-            <Download className="h-4 w-4" />
-            Download
+            <Download className="mr-1 h-3.5 w-3.5" /> Download
           </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="border rounded-md bg-muted/30 p-1 h-[80vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 h-[80vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code
               className={`${

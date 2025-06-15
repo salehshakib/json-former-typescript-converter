@@ -83,7 +83,7 @@ export default function JsonInputPanel({
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="resize-none h-[60vh] text-sm bg-muted/30 border-input focus:ring-primary font-code scrollbar-thin"
+          className="resize-none h-[70vh] text-sm bg-muted/30 border-input focus:ring-primary font-code scrollbar-thin"
           aria-label="JSON Input Area"
         />
       </CardContent>
