@@ -72,7 +72,7 @@ export default function JsonFormerPage() {
     const conversionResult = convertJsonToTs(currentJsonInput);
     
     // Simulate progress for conversion
-    await new Promise(resolve => setTimeout(resolve, 300)); // Short delay for UX
+    await new Promise(resolve => setTimeout(resolve, 300)); 
     setProgressValue(50);
 
 
@@ -108,14 +108,14 @@ export default function JsonFormerPage() {
     const currentInput = jsonInput; 
     // If input is empty, clear everything and don't start conversion
     if (!currentInput.trim()) {
-      memoizedHandleConvert(currentInput); // This will clear outputs
+      memoizedHandleConvert(currentInput); 
       return;
     }
     
     // Debounce logic
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput);
-    }, 750); // Convert 750ms after user stops typing
+    }, 750); 
 
     return () => {
       clearTimeout(handler);
@@ -188,7 +188,6 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput('');
-    // Outputs will be cleared by the useEffect watching jsonInput
   };
 
   const handleCopyTs = async () => {
@@ -240,13 +239,14 @@ export default function JsonFormerPage() {
             tsOutput={tsOutput}
             onDownload={handleDownloadTs}
             onCopy={handleCopyTs}
-            isLoading={isLoading} progressValue={0}          />
+            isLoading={isLoading}
+            progressValue={progressValue}
+          />
         </div>
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        Powered by AI & Next.js. &copy; {new Date().getFullYear()} JSONFormer.
+        Made with Firebase Studio by Saleh Shakib
       </footer>
     </div>
   );
 }
-
