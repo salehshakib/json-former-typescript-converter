@@ -8,7 +8,6 @@ import TypeScriptOutputPanel from '@/components/json-former/typescript-output-pa
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { convertJsonToTs } from '@/lib/json-to-ts';
-import { suggestTypescriptImprovements } from '@/ai/flows/suggest-improvements';
 
 const EXAMPLE_JSON = {
   user: {
@@ -49,7 +48,6 @@ const EXAMPLE_JSON = {
 export default function JsonFormerPage() {
   const [jsonInput, setJsonInput] = useState<string>('');
   const [tsOutput, setTsOutput] = useState<string>('');
-  const [aiSuggestions, setAiSuggestions] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progressValue, setProgressValue] = useState<number>(0);
   const { toast } = useToast();
@@ -57,16 +55,12 @@ export default function JsonFormerPage() {
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
-    toast({
-      title: "Example Loaded",
-      description: "Sample JSON has been loaded into the input area.",
-    });
+    // No toast here, conversion will trigger feedback if successful or not
   };
 
   const memoizedHandleConvert = useCallback(async (currentJsonInput: string) => {
     if (!currentJsonInput.trim()) {
       setTsOutput('');
-      setAiSuggestions('');
       setIsLoading(false);
       setProgressValue(0);
       return;
@@ -74,16 +68,9 @@ export default function JsonFormerPage() {
 
     setIsLoading(true);
     setTsOutput('');
-    setAiSuggestions('');
-    setProgressValue(10); // Initial progress
-
-    // Artificial delay for UX, can be adjusted or removed
-    // await new Promise(resolve => setTimeout(resolve, 100)); 
-    // setProgressValue(20);
-
+    setProgressValue(10); 
 
     const conversionResult = convertJsonToTs(currentJsonInput);
-    // await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
     
     if (conversionResult.error) {
       toast({
@@ -92,52 +79,24 @@ export default function JsonFormerPage() {
         variant: "destructive",
       });
       setTsOutput('');
-      setAiSuggestions('');
-      setProgressValue(0); // Reset progress on error
+      setProgressValue(0); 
       setIsLoading(false);
       return;
     }
 
     setTsOutput(conversionResult.typescriptCode);
-    setProgressValue(60); // Progress after TS conversion
+    setProgressValue(100); 
 
-    if (conversionResult.typescriptCode) {
-      try {
-        // await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
-        setProgressValue(70); // Progress before AI call
-        const aiResult = await suggestTypescriptImprovements({ typescriptCode: conversionResult.typescriptCode });
-        setAiSuggestions(aiResult.suggestions);
-        setProgressValue(100); // Progress after AI suggestions
-      } catch (aiError: any) {
-        console.error("AI Suggestion Error:", aiError);
-        setAiSuggestions("Could not fetch AI suggestions at this time."); // Provide direct feedback
-        toast({
-          title: "AI Suggestion Error",
-          description: "Failed to get AI suggestions. Please try again later.",
-          variant: "destructive",
-        });
-        setProgressValue(100); // Still complete progress visually
-      }
-    } else {
-      // No TS code to get suggestions for, but conversion was successful (empty JSON likely)
-      setAiSuggestions(''); // Ensure AI suggestions are cleared
-      setProgressValue(100); // Complete progress
-    }
-    
-    // Short delay to allow progress bar to show 100% before hiding
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    // }, 300);
     setIsLoading(false);
 
-  }, [toast, setTsOutput, setAiSuggestions, setIsLoading, setProgressValue, convertJsonToTs, suggestTypescriptImprovements]);
+  }, [toast, setTsOutput, setIsLoading, setProgressValue, convertJsonToTs]);
 
 
   useEffect(() => {
-    const currentInput = jsonInput; // Capture current jsonInput for the debounced call
+    const currentInput = jsonInput; 
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput);
-    }, 750); // 750ms debounce
+    }, 750); 
 
     return () => {
       clearTimeout(handler);
@@ -173,10 +132,7 @@ export default function JsonFormerPage() {
     try {
       const text = await navigator.clipboard.readText();
       setJsonInput(text);
-      toast({
-        title: "Pasted from Clipboard",
-        description: "JSON input has been updated.",
-      });
+      // Toasting here might be redundant if conversion auto-triggers
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
       toast({
@@ -214,10 +170,7 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput('');
-    toast({
-      title: "Input Cleared",
-      description: "JSON input area has been cleared.",
-    });
+    // No toast needed here as the UI will clear, and conversion will clear output.
   };
 
   const handleCopyTs = async () => {
@@ -267,11 +220,9 @@ export default function JsonFormerPage() {
         <div className="w-full md:w-1/2 flex flex-col">
           <TypeScriptOutputPanel
             tsOutput={tsOutput}
-            aiSuggestions={aiSuggestions}
             onDownload={handleDownloadTs}
             onCopy={handleCopyTs}
             isLoading={isLoading}
-            progressValue={progressValue}
           />
         </div>
       </main>
