@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -104,7 +105,9 @@ export default function JsonFormerPage() {
       if (conversionResult.typescriptCode) {
         toast({
           title: "Conversion Successful",
-          description: `JSON has been converted to TypeScript ${currentOutputFormat}s.`,
+          description: `JSON has been converted to TypeScript ${
+            currentOutputFormat === "interface" ? "interfaces" : "types"
+          }.`,
         });
       }
       setIsLoading(false);
@@ -247,7 +250,7 @@ export default function JsonFormerPage() {
           className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
         />
       )}
-      <main className="container mx-auto p-4 md:p-6 lg:p-8  flex flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0">
+      <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-1 flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0">
         <div className="w-full md:w-1/2 flex flex-col">
           <JsonInputPanel
             jsonInput={jsonInput}
