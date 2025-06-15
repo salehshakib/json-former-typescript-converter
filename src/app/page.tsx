@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -9,6 +10,42 @@ import { useToast } from "@/hooks/use-toast";
 import { convertJsonToTs } from '@/lib/json-to-ts';
 import { suggestTypescriptImprovements } from '@/ai/flows/suggest-improvements';
 
+const EXAMPLE_JSON = {
+  user: {
+    id: 1,
+    name: "Leanne Graham",
+    username: "Bret",
+    email: "Sincere@april.biz",
+    address: {
+      street: "Kulas Light",
+      suite: "Apt. 556",
+      city: "Gwenborough",
+      zipcode: "92998-3874",
+      geo: {
+        lat: "-37.3159",
+        lng: "81.1496"
+      }
+    },
+    phone: "1-770-736-8031 x56442",
+    website: "hildegard.org",
+    company: {
+      name: "Romaguera-Crona",
+      catchPhrase: "Multi-layered client-server neural-net",
+      bs: "harness real-time e-markets"
+    }
+  },
+  posts: [
+    {
+      userId: 1,
+      id: 1,
+      title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+      body: "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
+    }
+  ],
+  isActive: true,
+  tags: ["json", "typescript", "converter"]
+};
+
 export default function JsonFormerPage() {
   const [jsonInput, setJsonInput] = useState<string>('');
   const [tsOutput, setTsOutput] = useState<string>('');
@@ -17,44 +54,18 @@ export default function JsonFormerPage() {
   const [progressValue, setProgressValue] = useState<number>(0);
   const { toast } = useToast();
 
+  const handleLoadExampleJson = () => {
+    setJsonInput(JSON.stringify(EXAMPLE_JSON, null, 2));
+    toast({
+      title: "Example Loaded",
+      description: "Sample JSON has been loaded into the input area.",
+    });
+  };
+
   useEffect(() => {
-    // Example JSON for quick testing
-    const exampleJson = {
-      user: {
-        id: 1,
-        name: "Leanne Graham",
-        username: "Bret",
-        email: "Sincere@april.biz",
-        address: {
-          street: "Kulas Light",
-          suite: "Apt. 556",
-          city: "Gwenborough",
-          zipcode: "92998-3874",
-          geo: {
-            lat: "-37.3159",
-            lng: "81.1496"
-          }
-        },
-        phone: "1-770-736-8031 x56442",
-        website: "hildegard.org",
-        company: {
-          name: "Romaguera-Crona",
-          catchPhrase: "Multi-layered client-server neural-net",
-          bs: "harness real-time e-markets"
-        }
-      },
-      posts: [
-        {
-          userId: 1,
-          id: 1,
-          title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-          body: "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
-        }
-      ],
-      isActive: true,
-      tags: ["json", "typescript", "converter"]
-    };
-    setJsonInput(JSON.stringify(exampleJson, null, 2));
+    // Load example JSON on initial mount
+    handleLoadExampleJson();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -73,7 +84,6 @@ export default function JsonFormerPage() {
     setAiSuggestions('');
     setProgressValue(10);
 
-    // Simulate parsing delay
     await new Promise(resolve => setTimeout(resolve, 200));
     setProgressValue(30);
 
@@ -107,20 +117,18 @@ export default function JsonFormerPage() {
           description: "Failed to get AI suggestions. Please try again later.",
           variant: "destructive",
         });
-        setProgressValue(100); // Still complete the progress bar
+        setProgressValue(100);
       }
     } else {
-       setProgressValue(100); // No TS code to suggest on
+       setProgressValue(100);
     }
     
     setTimeout(() => {
       setIsLoading(false);
-      // Optionally reset progress after a delay if you want it to disappear
-      // setTimeout(() => setProgressValue(0), 1000); 
-    }, 500); // Keep 100% for a bit
+    }, 500);
   };
 
-  const handleDownload = () => {
+  const handleDownloadTs = () => {
     if (!tsOutput.trim()) {
       toast({
         title: "Download Error",
@@ -144,6 +152,75 @@ export default function JsonFormerPage() {
     });
   };
 
+  const handlePasteJson = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setJsonInput(text);
+      toast({
+        title: "Pasted from Clipboard",
+        description: "JSON input has been updated.",
+      });
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+      toast({
+        title: "Paste Error",
+        description: "Could not paste from clipboard. Check permissions or try manually.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFormatJson = () => {
+    try {
+      const parsedJson = JSON.parse(jsonInput);
+      setJsonInput(JSON.stringify(parsedJson, null, 2));
+      toast({
+        title: "JSON Formatted",
+        description: "The JSON input has been beautified.",
+      });
+    } catch (error) {
+      toast({
+        title: "Format Error",
+        description: "Invalid JSON. Could not format.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClearJson = () => {
+    setJsonInput('');
+    toast({
+      title: "Input Cleared",
+      description: "JSON input area has been cleared.",
+    });
+  };
+
+  const handleCopyTs = async () => {
+    if (!tsOutput.trim()) {
+      toast({
+        title: "Copy Error",
+        description: "No TypeScript code to copy.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(tsOutput);
+      toast({
+        title: "Copied to Clipboard",
+        description: "TypeScript code has been copied.",
+      });
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      toast({
+        title: "Copy Error",
+        description: "Could not copy to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <AppHeader />
@@ -151,19 +228,24 @@ export default function JsonFormerPage() {
         <Progress value={progressValue} className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent" />
       )}
       <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-        <div className="w-full md:w-1/2 flex">
+        <div className="w-full md:w-1/2 flex flex-col">
           <JsonInputPanel 
             jsonInput={jsonInput}
             setJsonInput={setJsonInput}
             onConvert={handleConvert}
             isLoading={isLoading}
+            onPaste={handlePasteJson}
+            onFormat={handleFormatJson}
+            onLoadExample={handleLoadExampleJson}
+            onClear={handleClearJson}
           />
         </div>
-        <div className="w-full md:w-1/2 flex">
+        <div className="w-full md:w-1/2 flex flex-col">
           <TypeScriptOutputPanel
             tsOutput={tsOutput}
             aiSuggestions={aiSuggestions}
-            onDownload={handleDownload}
+            onDownload={handleDownloadTs}
+            onCopy={handleCopyTs}
             isLoading={isLoading}
           />
         </div>
