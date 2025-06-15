@@ -15,17 +15,28 @@ function sanitizeKey(key: string): string {
   return `"${key}"`;
 }
 
-// Generates a plausible interface name from a key.
-// Tries to make singular for array items, e.g., "users" -> "User".
-function keyToInterfaceName(key: string): string {
-  let name = key.replace(/[^a-zA-Z0-9_]/g, ''); // Remove special characters
-  if (!name) name = 'Unnamed'; // Handle empty or fully special char keys
+// Generates a base, PascalCased, and somewhat singularized name from a key.
+// e.g., "users" -> "User", "address_data" -> "AddressData", "item" -> "Item"
+function getBaseTypeName(key: string): string {
+  let name = key.replace(/[^a-zA-Z0-9_]/g, ''); 
+  if (!name) name = 'Unnamed'; 
 
-  name = capitalize(name);
-  // Basic pluralization to singular for array item type names (very naive)
-  if (name.endsWith('ies')) {
+  // Convert to PascalCase from snake_case or camelCase
+  if (name.includes('_')) {
+    // Handle snake_case: convert to PascalCase (e.g., user_profile -> UserProfile)
+    name = name.split('_').map(part => capitalize(part.toLowerCase())).join('');
+  } else {
+    // Ensures camelCase becomes PascalCase (e.g., userProfile -> UserProfile)
+    // and single words or already PascalCase are correctly capitalized.
+    name = capitalize(name); 
+  }
+  
+  // Basic pluralization to singular (from original logic)
+  if (name.endsWith('ies') && name.length > 3) { // e.g., categories -> category
     name = name.substring(0, name.length - 3) + 'y';
-  } else if (name.endsWith('s') && !name.endsWith('ss')) {
+  } else if (name.endsWith('s') && !name.endsWith('ss') && name.length > 1) { // e.g., users -> user
+    // This simple heuristic might incorrectly singularize some words (e.g., "status" to "statu").
+    // A more robust pluralization library would be needed for perfect accuracy.
     name = name.substring(0, name.length - 1);
   }
   return name;
@@ -36,21 +47,22 @@ export function convertJsonToTs(jsonString: string, rootName: string = "RootObje
   try {
     const data = JSON.parse(jsonString);
     let accumulatedInterfaces: string = "";
-    const definedInterfaceNames: Set<string> = new Set(); // Tracks names of interfaces already defined
+    // Tracks names of interfaces (IXyz) and types (TXyz) already defined to ensure uniqueness
+    const definedNames: Set<string> = new Set(); 
 
-    function generateUniqueInterfaceName(baseName: string): string {
-      let interfaceName = baseName;
+    // Generates a unique name (e.g., IXyz, IXyz1 or TXyz, TXyz1) by appending a number if needed.
+    function generateUniquePrefixedName(prefixedName: string): string {
+      let finalName = prefixedName;
       let count = 1;
-      // Ensure unique name if baseName is already taken by a different structure
-      // This simple uniqueness just appends a number. A more robust system
-      // would compare structures if names collide.
-      while (definedInterfaceNames.has(interfaceName)) {
-        interfaceName = `${baseName}${count++}`;
+      while (definedNames.has(finalName)) {
+        finalName = `${prefixedName}${count++}`;
       }
-      return interfaceName;
+      return finalName;
     }
 
-    function generateTsDefinition(value: any, suggestedName: string): string {
+    function generateTsDefinition(value: any, baseNameForType: string): string {
+      // baseNameForType is the non-prefixed, PascalCased, singularized name.
+      // e.g., "User", "Address", "RootObject", "Item"
       if (value === null) return "null";
       if (typeof value === "string") return "string";
       if (typeof value === "number") return "number";
@@ -58,49 +70,49 @@ export function convertJsonToTs(jsonString: string, rootName: string = "RootObje
 
       if (Array.isArray(value)) {
         if (value.length === 0) return "any[]";
-        // Assuming homogeneous array, infer type from first element
-        const itemTypeName = generateTsDefinition(value[0], keyToInterfaceName(suggestedName + "Item"));
-        return `${itemTypeName}[]`;
+        // For array items, get a singular base name (e.g., "Users" -> "User")
+        const itemBaseName = getBaseTypeName(baseNameForType); 
+        const itemTypeName = generateTsDefinition(value[0], itemBaseName);
+        return `${itemTypeName}[]`; // e.g., "IUser[]"
       }
 
       if (typeof value === "object") {
-        const interfaceName = generateUniqueInterfaceName(capitalize(sanitizeKey(suggestedName).replace(/"/g, '')));
+        const prefixedInterfaceName = "I" + baseNameForType; // e.g. "IRootObject", "IUser"
+        const interfaceName = generateUniquePrefixedName(prefixedInterfaceName);
         
-        // Check if an interface with this name has already been fully defined.
-        // This check is simplistic; ideally, it would compare the structure.
-        if (!definedInterfaceNames.has(interfaceName)) {
-          definedInterfaceNames.add(interfaceName); // Mark as defined (or about to be)
+        if (!definedNames.has(interfaceName)) {
+          definedNames.add(interfaceName); 
 
           let objectInterface = `interface ${interfaceName} {\n`;
           for (const key in value) {
             if (Object.prototype.hasOwnProperty.call(value, key)) {
-              objectInterface += `  ${sanitizeKey(key)}: ${generateTsDefinition(value[key], keyToInterfaceName(key))};\n`;
+              // For properties, generate a base name from the key
+              const propertyBaseName = getBaseTypeName(key); 
+              objectInterface += `  ${sanitizeKey(key)}: ${generateTsDefinition(value[key], propertyBaseName)};\n`;
             }
           }
           objectInterface += `}\n\n`;
-          accumulatedInterfaces = objectInterface + accumulatedInterfaces; // Prepend to define nested types first
+          // Prepend to ensure nested types are defined before they are used
+          accumulatedInterfaces = objectInterface + accumulatedInterfaces; 
         }
-        return interfaceName;
+        return interfaceName; // Returns the prefixed name, e.g., "IRootObject", "IUser"
       }
-      return "any";
+      return "any"; // Fallback for any other types
     }
 
-    const finalRootTypeName = generateTsDefinition(data, rootName);
+    // Get a clean base name for the root type (e.g., "RootObject")
+    const baseRootName = getBaseTypeName(rootName); 
+    const finalRootTypeNameString = generateTsDefinition(data, baseRootName);
 
-    // If the root is an array or primitive, create a type alias for RootObject
-    if ( (Array.isArray(data) || (typeof data !== 'object' && data !== null)) && finalRootTypeName !== rootName ) {
-         accumulatedInterfaces = `type ${rootName} = ${finalRootTypeName};\n\n` + accumulatedInterfaces;
-    } else if (typeof data === "object" && !Array.isArray(data) && finalRootTypeName !== rootName) {
-        // This case can happen if the root object itself was simple enough that its type string was returned directly,
-        // or if generateUniqueInterfaceName changed `rootName`.
-        // We should ensure the `rootName` is used for the top-level type definition if it's an object.
-        // The current logic of `generateTsDefinition` for objects should return the interface name.
-        // If `finalRootTypeName` is the actual name of the generated interface for the root object, this is fine.
-        // If not, it means the root object's interface wasn't named `rootName`.
-        // The current structure has `generateTsDefinition` always try to make an interface for an object
-        // and add it to `accumulatedInterfaces`. The `finalRootTypeName` should be its name.
+    // If the root JSON is an array or a primitive type, create a type alias (e.g., TRootObject)
+    if ((Array.isArray(data) || (typeof data !== 'object' && data !== null))) {
+         const prefixedTypeAliasName = "T" + baseRootName; // e.g. "TRootObject"
+         const finalTypeAliasName = generateUniquePrefixedName(prefixedTypeAliasName);
+         definedNames.add(finalTypeAliasName); // Register the type alias name
+         // Prepend the type alias definition
+         accumulatedInterfaces = `type ${finalTypeAliasName} = ${finalRootTypeNameString};\n\n` + accumulatedInterfaces;
     }
-
+    // If the root is an object, its interface (e.g., IRootObject) is already generated and in accumulatedInterfaces.
 
     return { typescriptCode: accumulatedInterfaces.trim(), error: undefined };
 
@@ -111,3 +123,5 @@ export function convertJsonToTs(jsonString: string, rootName: string = "RootObje
     return { typescriptCode: "", error: `An unexpected error occurred: ${e.message}` };
   }
 }
+
+    
