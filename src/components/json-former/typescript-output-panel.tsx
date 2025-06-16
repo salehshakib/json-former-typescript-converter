@@ -190,7 +190,7 @@ export default function TypeScriptOutputPanel({
             </Button>
           </div>
         )}
-        <ScrollArea className="border rounded-md bg-muted/30 flex-1 min-h-[200px] h-[70vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 flex-1 min-h-0 h-[70vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code
               className={`${
