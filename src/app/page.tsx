@@ -316,7 +316,7 @@ export default function JsonFormerPage() {
 
   return (
     <TooltipProvider>
-      <div className="h-screen flex flex-col bg-background text-foreground">
+      <div className="min-h-screen flex flex-col bg-background text-foreground">
         <AppHeader />
         {isLoading && (
           <Progress
@@ -324,7 +324,7 @@ export default function JsonFormerPage() {
             className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
           />
         )}
-        <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-1 flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0">
+        <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-1 flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0 overflow-hidden">
           <div className="w-full md:w-1/2 flex flex-col">
             <JsonInputPanel
               jsonInput={jsonInput}

@@ -79,8 +79,8 @@ export default function TypeScriptOutputPanel({
   const isFormatSwitchDisabled = isLoading || isFetchingAiSuggestions || activeTsView !== 'current';
 
   return (
-    <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden h-full">
-      <CardHeader className="flex flex-row items-start justify-between gap-2">
+    <Card className="flex h-[80vh] flex-col shadow-lg rounded-xl overflow-hidden">
+      <CardHeader className="flex flex-row items-start justify-between gap-2 pb-3">
         <div>
           <CardTitle className="text-2xl font-headline">
             TypeScript Output
@@ -161,7 +161,7 @@ export default function TypeScriptOutputPanel({
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
         {hasAcceptedAiSuggestion && (
-           <div className="flex items-center p-1 bg-muted rounded-lg mb-4">
+           <div className="flex items-center p-1 bg-muted rounded-lg ">
             <Button
               variant="ghost"
               size="sm"
@@ -190,7 +190,7 @@ export default function TypeScriptOutputPanel({
             </Button>
           </div>
         )}
-        <ScrollArea className="border rounded-md bg-muted/30 flex-1 min-h-0 h-[70vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 flex-1 min-h-0 ">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code
               className={`${

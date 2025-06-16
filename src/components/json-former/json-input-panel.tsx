@@ -37,7 +37,7 @@ export default function JsonInputPanel({
   onClear,
 }: JsonInputPanelProps) {
   return (
-    <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden h-full">
+    <Card className="flex flex-1 min-h-[70vh] flex-col shadow-lg rounded-xl overflow-hidden h-full">
       <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">JSON Input</CardTitle>
@@ -116,7 +116,7 @@ export default function JsonInputPanel({
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='{ "name": "JSONFormer", "version": 1 }'
-          className="resize-none h-[80vh] scrollbar-thin outline-none text-sm border rounded-md bg-muted/30 focus:ring-0 font-code   w-full"
+          className="resize-none h-full min-h-[60vh] scrollbar-thin outline-none text-sm border rounded-md bg-muted/30 focus:ring-0 font-code   w-full"
           aria-label="JSON Input Area"
         />
       </CardContent>

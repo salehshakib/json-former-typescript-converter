@@ -3,7 +3,7 @@ import { ThemeToggleButton } from '@/components/theme-toggle-button';
 
 export default function AppHeader() {
   return (
-    <header className="py-6 px-4 md:px-8 border-b border-border shadow-sm bg-card">
+    <header className="py-4 px-4 md:px-8 border-b border-border shadow-sm bg-card">
       <div className="container mx-auto flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Code2 className="h-8 w-8 text-primary" />
