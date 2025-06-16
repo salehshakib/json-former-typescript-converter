@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -29,9 +28,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { OutputFormat } from "@/app/page";
-import type { SuggestionItem } from "@/ai/flows/suggest-improvements"; 
+import type { SuggestionItem } from "@/ai/flows/suggest-improvements";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
@@ -73,11 +74,17 @@ export default function TypeScriptOutputPanel({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center space-x-2 mr-2">
-            <FileJson2
-              className="h-5 w-5 text-muted-foreground"
-              aria-label="Interface format"
-              title="Interface format"
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <FileJson2
+                  className="h-5 w-5 text-muted-foreground"
+                  aria-label="Interface format"
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Interface</p>
+              </TooltipContent>
+            </Tooltip>
             <Switch
               id="output-format-switch"
               checked={outputFormat === "type"}
@@ -87,11 +94,17 @@ export default function TypeScriptOutputPanel({
               aria-label="Toggle output format between Interface (off) and Type (on)"
               disabled={isLoading || isFetchingAiSuggestions}
             />
-            <Type
-              className="h-5 w-5 text-muted-foreground"
-              aria-label="Type alias format"
-              title="Type alias format"
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Type
+                  className="h-5 w-5 text-muted-foreground"
+                  aria-label="Type alias format"
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>TypeScript</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <Button
             variant="outline"
@@ -132,10 +145,15 @@ export default function TypeScriptOutputPanel({
           </pre>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-4 p-4 pt-2 border-t">
+      <CardFooter className="flex flex-col items-start gap-4 p-4  border-t">
         <Button
           onClick={onFetchAiSuggestions}
-          disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput || aiSuggestions !== null}
+          disabled={
+            isLoading ||
+            isFetchingAiSuggestions ||
+            !hasTsOutput ||
+            aiSuggestions !== null
+          }
           size="sm"
           variant="outline"
           className="w-full"
@@ -147,10 +165,17 @@ export default function TypeScriptOutputPanel({
           )}
           {isFetchingAiSuggestions
             ? "Thinking..."
-            : aiSuggestions !== null ? "Suggestions Loaded" : "Get AI Enhancement Suggestions"}
+            : aiSuggestions !== null
+            ? "Suggestions Loaded"
+            : "Get AI Enhancement Suggestions"}
         </Button>
         {aiSuggestions && aiSuggestions.length > 0 && (
-          <Accordion type="single" collapsible className="w-full" defaultValue="ai-suggestions-item-0">
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            defaultValue="ai-suggestions-item-0"
+          >
             {aiSuggestions.map((suggestion, index) => (
               <AccordionItem value={`ai-suggestions-item-${index}`} key={index}>
                 <AccordionTrigger className="text-sm text-left hover:no-underline">
@@ -169,7 +194,9 @@ export default function TypeScriptOutputPanel({
                       size="sm"
                       variant="outline"
                       className="mt-3 w-full"
-                      onClick={() => onAcceptAiSuggestion(suggestion.suggestedCode!)}
+                      onClick={() =>
+                        onAcceptAiSuggestion(suggestion.suggestedCode!)
+                      }
                       disabled={isFetchingAiSuggestions || isLoading}
                     >
                       <CheckCircle className="mr-2 h-4 w-4" />

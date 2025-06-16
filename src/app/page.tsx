@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { convertJsonToTs } from "@/lib/json-to-ts";
 import { suggestTypescriptImprovements, type SuggestionItem, type SuggestTypescriptImprovementsOutput } from "@/ai/flows/suggest-improvements";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const EXAMPLE_JSON = {
   user: {
@@ -272,44 +273,46 @@ export default function JsonFormerPage() {
 
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
-      <AppHeader />
-      {isLoading && (
-        <Progress
-          value={progressValue}
-          className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
-        />
-      )}
-      <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-1 flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0">
-        <div className="w-full md:w-1/2 flex flex-col">
-          <JsonInputPanel
-            jsonInput={jsonInput}
-            setJsonInput={setJsonInput}
-            isLoading={isLoading}
-            onPaste={handlePasteJson}
-            onFormat={handleFormatJson}
-            onLoadExample={handleLoadExampleJson}
-            onClear={handleClearJson}
+    <TooltipProvider>
+      <div className="h-screen flex flex-col bg-background text-foreground">
+        <AppHeader />
+        {isLoading && (
+          <Progress
+            value={progressValue}
+            className="w-full h-1 fixed top-0 left-0 z-50 rounded-none bg-accent/30 [&>div]:bg-accent"
           />
-        </div>
-        <div className="w-full md:w-1/2 flex flex-col">
-          <TypeScriptOutputPanel
-            tsOutput={tsOutput}
-            onDownload={handleDownloadTs}
-            onCopy={handleCopyTs}
-            isLoading={isLoading}
-            outputFormat={outputFormat}
-            setOutputFormat={setOutputFormat}
-            aiSuggestions={aiSuggestions}
-            isFetchingAiSuggestions={isFetchingAiSuggestions}
-            onFetchAiSuggestions={handleFetchAiSuggestions}
-            onAcceptAiSuggestion={handleAcceptAiSuggestion}
-          />
-        </div>
-      </main>
-      <footer className="py-4 text-center text-xs text-muted-foreground border-t">
-        Crafted by Saleh Shakib with Firebase Studio.
-      </footer>
-    </div>
+        )}
+        <main className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-1 flex-col md:flex-row gap-6 md:gap-8 items-stretch min-h-0">
+          <div className="w-full md:w-1/2 flex flex-col">
+            <JsonInputPanel
+              jsonInput={jsonInput}
+              setJsonInput={setJsonInput}
+              isLoading={isLoading}
+              onPaste={handlePasteJson}
+              onFormat={handleFormatJson}
+              onLoadExample={handleLoadExampleJson}
+              onClear={handleClearJson}
+            />
+          </div>
+          <div className="w-full md:w-1/2 flex flex-col">
+            <TypeScriptOutputPanel
+              tsOutput={tsOutput}
+              onDownload={handleDownloadTs}
+              onCopy={handleCopyTs}
+              isLoading={isLoading}
+              outputFormat={outputFormat}
+              setOutputFormat={setOutputFormat}
+              aiSuggestions={aiSuggestions}
+              isFetchingAiSuggestions={isFetchingAiSuggestions}
+              onFetchAiSuggestions={handleFetchAiSuggestions}
+              onAcceptAiSuggestion={handleAcceptAiSuggestion}
+            />
+          </div>
+        </main>
+        <footer className="py-4 text-center text-xs text-muted-foreground border-t">
+          Crafted by Saleh Shakib with Firebase Studio.
+        </footer>
+      </div>
+    </TooltipProvider>
   );
 }
