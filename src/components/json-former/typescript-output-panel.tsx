@@ -161,16 +161,16 @@ export default function TypeScriptOutputPanel({
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
         {hasAcceptedAiSuggestion && (
-          <div className="flex items-center gap-2 mb-4">
+           <div className="flex items-center p-1 bg-muted rounded-lg mb-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setActiveTsView('current')}
               className={cn(
-                "flex-1 rounded-md",
+                "flex-1 rounded-md transition-colors duration-150 ease-in-out",
                 activeTsView === 'current'
-                  ? "bg-muted text-primary shadow-sm font-medium"
-                  : "bg-transparent text-foreground hover:bg-muted/50 font-medium"
+                  ? "bg-background text-foreground shadow font-semibold"
+                  : "text-muted-foreground hover:text-foreground font-medium"
               )}
             >
               Current
@@ -180,10 +180,10 @@ export default function TypeScriptOutputPanel({
               size="sm"
               onClick={() => setActiveTsView('aiEnhanced')}
               className={cn(
-                "flex-1 rounded-md",
+                "flex-1 rounded-md transition-colors duration-150 ease-in-out",
                 activeTsView === 'aiEnhanced'
-                  ? "bg-muted text-primary shadow-sm font-medium"
-                  : "bg-transparent text-foreground hover:bg-muted/50 font-medium"
+                  ? "bg-background text-foreground shadow font-semibold"
+                  : "text-muted-foreground hover:text-foreground font-medium"
               )}
             >
               Enhanced
@@ -273,3 +273,4 @@ export default function TypeScriptOutputPanel({
     </Card>
   );
 }
+
