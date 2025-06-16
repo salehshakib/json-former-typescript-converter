@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { AlignLeft, ClipboardPaste, FileJson, Trash2 } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface JsonInputPanelProps {
   jsonInput: string;
@@ -53,7 +56,7 @@ export default function JsonInputPanel({
                 <ClipboardPaste className="h-4 w-4 " />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="text-sm">
+            <TooltipContent className="text-xs">
               <p>Paste JSON</p>
             </TooltipContent>
           </Tooltip>
@@ -69,7 +72,7 @@ export default function JsonInputPanel({
                 <AlignLeft className="h-4 w-4 " />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="text-sm">
+            <TooltipContent className="text-xs">
               <p>Format JSON</p>
             </TooltipContent>
           </Tooltip>
@@ -85,7 +88,7 @@ export default function JsonInputPanel({
                 <FileJson className="h-4 w-4 " />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="text-sm">
+            <TooltipContent className="text-xs">
               <p>Load Example JSON</p>
             </TooltipContent>
           </Tooltip>
@@ -102,7 +105,7 @@ export default function JsonInputPanel({
                 <Trash2 className="h-4 w-4 " />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="text-sm">
+            <TooltipContent className="text-xs">
               <p>Clear JSON Input</p>
             </TooltipContent>
           </Tooltip>

@@ -70,16 +70,20 @@ export default function JsonFormerPage() {
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("interface");
   const [aiSuggestions, setAiSuggestions] = useState<SuggestionItem[] | null>(null);
   const [isFetchingAiSuggestions, setIsFetchingAiSuggestions] = useState<boolean>(false);
+  const [acceptedAiSuggestionCode, setAcceptedAiSuggestionCode] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
+    setAcceptedAiSuggestionCode(null);
+    setAiSuggestions(null);
   };
 
   const memoizedHandleConvert = useCallback(
     async (currentJsonInput: string, currentOutputFormat: OutputFormat) => {
       setAiSuggestions(null); 
+      setAcceptedAiSuggestionCode(null);
       if (!currentJsonInput.trim()) {
         setTsOutput("");
         setIsLoading(false);
@@ -123,10 +127,16 @@ export default function JsonFormerPage() {
     if (!currentInput.trim()) {
       setTsOutput("");
       setAiSuggestions(null);
+      setAcceptedAiSuggestionCode(null);
       setIsLoading(false);
       setProgressValue(0);
       return;
     }
+    
+    // Clear accepted AI suggestion when input changes before new conversion
+    setAcceptedAiSuggestionCode(null);
+    setAiSuggestions(null);
+
 
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput, currentFormat);
@@ -165,6 +175,8 @@ export default function JsonFormerPage() {
     try {
       const text = await navigator.clipboard.readText();
       setJsonInput(text);
+      setAcceptedAiSuggestionCode(null);
+      setAiSuggestions(null);
     } catch (err) {
       console.error("Failed to read clipboard contents: ", err);
       toast({
@@ -188,6 +200,8 @@ export default function JsonFormerPage() {
     try {
       const parsedJson = JSON.parse(jsonInput);
       setJsonInput(JSON.stringify(parsedJson, null, 2));
+      setAcceptedAiSuggestionCode(null);
+      setAiSuggestions(null);
     } catch (error) {
       toast({
         title: "Format Error",
@@ -199,6 +213,8 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput("");
+    setAcceptedAiSuggestionCode(null);
+    setAiSuggestions(null);
   };
 
   const handleCopyTs = async () => {
@@ -212,6 +228,10 @@ export default function JsonFormerPage() {
     }
     try {
       await navigator.clipboard.writeText(tsOutput);
+      toast({
+        title: "Copied!",
+        description: "Current TypeScript output copied to clipboard.",
+      });
     } catch (err) {
       console.error("Failed to copy text: ", err);
       toast({
@@ -232,14 +252,13 @@ export default function JsonFormerPage() {
       return;
     }
     setIsFetchingAiSuggestions(true);
-    setAiSuggestions(null);
+    setAiSuggestions(null); // Clear previous suggestions before fetching new ones
     try {
       const result: SuggestTypescriptImprovementsOutput = await suggestTypescriptImprovements({ 
         typescriptCode: tsOutput,
         jsonInput: jsonInput 
       });
       if (result.suggestions && result.suggestions.length > 0) {
-        // Filter out suggestions that don't have a description or are clearly problematic
         const validSuggestions = result.suggestions.filter(s => s.description && s.description.trim() !== "");
         if (validSuggestions.length > 0) {
             setAiSuggestions(validSuggestions);
@@ -264,11 +283,62 @@ export default function JsonFormerPage() {
 
   const handleAcceptAiSuggestion = (suggestedCode: string) => {
     setTsOutput(suggestedCode);
+    setAcceptedAiSuggestionCode(suggestedCode);
     toast({
       title: "AI Suggestion Applied",
-      description: "The TypeScript output has been updated.",
+      description: "The TypeScript output has been updated. View in 'Current Output' or 'AI Enhanced' tab.",
     });
-    // setAiSuggestions(null); // Optionally clear suggestions if desired after applying one
+  };
+
+  const handleCopyAiSuggestedTs = async () => {
+    if (!acceptedAiSuggestionCode || !acceptedAiSuggestionCode.trim()) {
+      toast({
+        title: "Copy Error",
+        description: "No AI enhanced TypeScript code to copy.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(acceptedAiSuggestionCode);
+      toast({
+        title: "Copied!",
+        description: "AI enhanced TypeScript copied to clipboard.",
+      });
+    } catch (err) {
+      console.error("Failed to copy AI enhanced text: ", err);
+      toast({
+        title: "Copy Error",
+        description: "Could not copy AI enhanced code to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadAiSuggestedTs = () => {
+    if (!acceptedAiSuggestionCode || !acceptedAiSuggestionCode.trim()) {
+      toast({
+        title: "Download Error",
+        description: "No AI enhanced TypeScript code to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const blob = new Blob([acceptedAiSuggestionCode], {
+      type: "text/typescript;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ai-enhanced.ts";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Downloaded!",
+      description: "AI enhanced TypeScript file downloaded.",
+    });
   };
 
 
@@ -297,8 +367,8 @@ export default function JsonFormerPage() {
           <div className="w-full md:w-1/2 flex flex-col">
             <TypeScriptOutputPanel
               tsOutput={tsOutput}
-              onDownload={handleDownloadTs}
-              onCopy={handleCopyTs}
+              onDownloadCurrentTs={handleDownloadTs}
+              onCopyCurrentTs={handleCopyTs}
               isLoading={isLoading}
               outputFormat={outputFormat}
               setOutputFormat={setOutputFormat}
@@ -306,6 +376,9 @@ export default function JsonFormerPage() {
               isFetchingAiSuggestions={isFetchingAiSuggestions}
               onFetchAiSuggestions={handleFetchAiSuggestions}
               onAcceptAiSuggestion={handleAcceptAiSuggestion}
+              acceptedAiSuggestionCode={acceptedAiSuggestionCode}
+              onCopyAiSuggestedTs={handleCopyAiSuggestedTs}
+              onDownloadAiSuggestedTs={handleDownloadAiSuggestedTs}
             />
           </div>
         </main>
