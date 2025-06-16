@@ -8,6 +8,7 @@ import TypeScriptOutputPanel from "@/components/json-former/typescript-output-pa
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { convertJsonToTs } from "@/lib/json-to-ts";
+import { suggestTypescriptImprovements, type SuggestTypescriptImprovementsOutput } from "@/ai/flows/suggest-improvements";
 
 const EXAMPLE_JSON = {
   user: {
@@ -44,6 +45,18 @@ const EXAMPLE_JSON = {
   ],
   isActive: true,
   tags: ["json", "typescript", "converter"],
+  userCurrency: {
+    currencyId: 3,
+    fullName: "United Arab Emirates Dirham",
+    shortName: "AED",
+    symbol: "د.إ"
+  },
+  baseCurrency: {
+    currencyId: 3,
+    fullName: "United Arab Emirates Dirham",
+    shortName: "AED",
+    symbol: "د.إ"
+  },
 };
 
 export type OutputFormat = "interface" | "type";
@@ -54,6 +67,8 @@ export default function JsonFormerPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progressValue, setProgressValue] = useState<number>(0);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("interface");
+  const [aiSuggestions, setAiSuggestions] = useState<string | null>(null);
+  const [isFetchingAiSuggestions, setIsFetchingAiSuggestions] = useState<boolean>(false);
   const { toast } = useToast();
 
   const handleLoadExampleJson = () => {
@@ -67,6 +82,7 @@ export default function JsonFormerPage() {
 
   const memoizedHandleConvert = useCallback(
     async (currentJsonInput: string, currentOutputFormat: OutputFormat) => {
+      setAiSuggestions(null); // Clear previous AI suggestions
       if (!currentJsonInput.trim()) {
         setTsOutput("");
         setIsLoading(false);
@@ -76,7 +92,7 @@ export default function JsonFormerPage() {
 
       setIsLoading(true);
       setTsOutput("");
-      setProgressValue(10); // Initial progress
+      setProgressValue(10); 
 
       const conversionResult = convertJsonToTs(
         currentJsonInput,
@@ -84,7 +100,6 @@ export default function JsonFormerPage() {
         currentOutputFormat
       );
 
-      // Simulate conversion time
       await new Promise((resolve) => setTimeout(resolve, 300));
       setProgressValue(100);
 
@@ -118,19 +133,15 @@ export default function JsonFormerPage() {
   useEffect(() => {
     const currentInput = jsonInput;
     const currentFormat = outputFormat;
-    // If input is empty, clear everything and return
     if (!currentInput.trim()) {
-      memoizedHandleConvert(currentInput, currentFormat); // This will clear outputs
+      memoizedHandleConvert(currentInput, currentFormat);
       return;
     }
 
-    // Debounce mechanism
     const handler = setTimeout(() => {
       memoizedHandleConvert(currentInput, currentFormat);
-    }, 750); // Adjust delay as needed
+    }, 750); 
 
-    // Cleanup function to clear timeout if input changes before delay,
-    // or if component unmounts.
     return () => {
       clearTimeout(handler);
     };
@@ -241,6 +252,41 @@ export default function JsonFormerPage() {
     }
   };
 
+  const handleFetchAiSuggestions = async () => {
+    if (!tsOutput.trim()) {
+      toast({
+        title: "AI Suggestions Error",
+        description: "No TypeScript code to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsFetchingAiSuggestions(true);
+    setAiSuggestions(null);
+    try {
+      const result: SuggestTypescriptImprovementsOutput = await suggestTypescriptImprovements({ 
+        typescriptCode: tsOutput,
+        jsonInput: jsonInput 
+      });
+      setAiSuggestions(result.suggestions);
+       toast({
+        title: "AI Suggestions Ready",
+        description: "Suggestions for your TypeScript code have been generated.",
+      });
+    } catch (error) {
+      console.error("Failed to fetch AI suggestions:", error);
+      toast({
+        title: "AI Suggestions Error",
+        description: "Could not fetch suggestions from the AI. Please try again.",
+        variant: "destructive",
+      });
+      setAiSuggestions("Failed to load suggestions.");
+    } finally {
+      setIsFetchingAiSuggestions(false);
+    }
+  };
+
+
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
       <AppHeader />
@@ -270,12 +316,15 @@ export default function JsonFormerPage() {
             isLoading={isLoading}
             outputFormat={outputFormat}
             setOutputFormat={setOutputFormat}
+            aiSuggestions={aiSuggestions}
+            isFetchingAiSuggestions={isFetchingAiSuggestions}
+            onFetchAiSuggestions={handleFetchAiSuggestions}
           />
         </div>
       </main>
-      {/* <footer className="py-4 text-center text-xs text-muted-foreground border-t ">
+      <footer className="py-4 text-center text-xs text-muted-foreground border-t">
         Crafted by Saleh Shakib with Firebase Studio.
-      </footer> */}
+      </footer>
     </div>
   );
 }
