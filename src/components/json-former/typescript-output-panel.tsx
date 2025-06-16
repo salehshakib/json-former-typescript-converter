@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -31,8 +32,7 @@ import type { OutputFormat } from "@/app/page";
 import type { SuggestionItem } from "@/ai/flows/suggest-improvements";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
@@ -81,7 +81,7 @@ export default function TypeScriptOutputPanel({
                   aria-label="Interface format"
                 />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="text-sm">
                 <p>Interface</p>
               </TooltipContent>
             </Tooltip>
@@ -101,31 +101,43 @@ export default function TypeScriptOutputPanel({
                   aria-label="Type alias format"
                 />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="text-sm">
                 <p>TypeScript</p>
               </TooltipContent>
             </Tooltip>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onCopy}
-            disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
-            aria-label="Copy TypeScript code"
-            title="Copy TypeScript"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onDownload}
-            disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
-            aria-label="Download TypeScript file"
-            title="Download TypeScript"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onCopy}
+                disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
+                aria-label="Copy TypeScript code"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-sm">
+              <p>Copy TypeScript</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onDownload}
+                disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
+                aria-label="Download TypeScript file"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-sm">
+              <p>Download TypeScript</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
@@ -145,14 +157,14 @@ export default function TypeScriptOutputPanel({
           </pre>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-4 p-4  border-t">
+      <CardFooter className="flex flex-col items-start gap-4 p-4 pt-2 border-t">
         <Button
           onClick={onFetchAiSuggestions}
           disabled={
             isLoading ||
             isFetchingAiSuggestions ||
             !hasTsOutput ||
-            aiSuggestions !== null
+            aiSuggestions !== null 
           }
           size="sm"
           variant="outline"
