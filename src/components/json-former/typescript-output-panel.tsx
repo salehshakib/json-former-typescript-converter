@@ -41,8 +41,8 @@ import { cn } from "@/lib/utils";
 
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
-  onDownloadTs: () => void; // Generic download handler, page.tsx determines what to download
-  onCopyTs: () => void; // Generic copy handler
+  onDownloadTs: () => void;
+  onCopyTs: () => void;
   isLoading: boolean;
   outputFormat: OutputFormat;
   setOutputFormat: Dispatch<SetStateAction<OutputFormat>>;
@@ -90,7 +90,7 @@ export default function TypeScriptOutputPanel({
           </CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-           {activeTsView === 'current' && ( // Only show format switch for current view
+           {activeTsView === 'current' && (
             <div className="flex items-center space-x-2">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -130,7 +130,7 @@ export default function TypeScriptOutputPanel({
               <Button
                 variant="outline"
                 size="icon"
-                onClick={onCopyTs} // Page.tsx handles which code to copy
+                onClick={onCopyTs}
                 disabled={isLoading || isFetchingAiSuggestions || !displayHasContent}
                 aria-label="Copy TypeScript code"
               >
@@ -138,7 +138,7 @@ export default function TypeScriptOutputPanel({
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">
-              <p>Copy {activeTsView === 'aiEnhanced' ? "Enhanced" : "Current"} Code</p>
+              <p>Copy {activeTsView === 'aiEnhanced' && hasAcceptedAiSuggestion ? "Enhanced" : "Current"} Code</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -146,7 +146,7 @@ export default function TypeScriptOutputPanel({
               <Button
                 variant="outline"
                 size="icon"
-                onClick={onDownloadTs} // Page.tsx handles which code to download
+                onClick={onDownloadTs}
                 disabled={isLoading || isFetchingAiSuggestions || !displayHasContent}
                 aria-label="Download TypeScript file"
               >
@@ -154,23 +154,23 @@ export default function TypeScriptOutputPanel({
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">
-              <p>Download {activeTsView === 'aiEnhanced' ? "Enhanced" : "Current"} Code</p>
+              <p>Download {activeTsView === 'aiEnhanced' && hasAcceptedAiSuggestion ? "Enhanced" : "Current"} Code</p>
             </TooltipContent>
           </Tooltip>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
         {hasAcceptedAiSuggestion && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setActiveTsView('current')}
               className={cn(
-                "flex-1",
-                activeTsView === 'current' 
-                  ? "bg-secondary text-primary hover:bg-secondary/90 font-semibold" 
-                  : "text-foreground hover:bg-accent/50"
+                "flex-1 rounded-md",
+                activeTsView === 'current'
+                  ? "bg-muted text-primary shadow-sm font-medium"
+                  : "bg-transparent text-foreground hover:bg-muted/50 font-medium"
               )}
             >
               Current
@@ -179,11 +179,11 @@ export default function TypeScriptOutputPanel({
               variant="ghost"
               size="sm"
               onClick={() => setActiveTsView('aiEnhanced')}
-               className={cn(
-                "flex-1",
-                activeTsView === 'aiEnhanced' 
-                  ? "bg-secondary text-primary hover:bg-secondary/90 font-semibold" 
-                  : "text-foreground hover:bg-accent/50"
+              className={cn(
+                "flex-1 rounded-md",
+                activeTsView === 'aiEnhanced'
+                  ? "bg-muted text-primary shadow-sm font-medium"
+                  : "bg-transparent text-foreground hover:bg-muted/50 font-medium"
               )}
             >
               Enhanced
@@ -212,8 +212,8 @@ export default function TypeScriptOutputPanel({
           disabled={
             isLoading ||
             isFetchingAiSuggestions ||
-            !hasTsOutput || // Disable if no base TS output to analyze
-            aiSuggestions !== null // Disable if suggestions are already loaded
+            !hasTsOutput || 
+            aiSuggestions !== null 
           }
           size="sm"
           variant="outline"
@@ -226,7 +226,7 @@ export default function TypeScriptOutputPanel({
           )}
           {isFetchingAiSuggestions
             ? "Thinking..."
-            : aiSuggestions !== null 
+            : aiSuggestions !== null
             ? "Suggestions Loaded"
             : "Get AI Enhancement Suggestions"}
         </Button>
@@ -235,7 +235,7 @@ export default function TypeScriptOutputPanel({
             type="single"
             collapsible
             className="w-full"
-            defaultValue="ai-suggestions-item-0" 
+            defaultValue="ai-suggestions-item-0"
           >
             {aiSuggestions.map((suggestion, index) => (
               <AccordionItem value={`ai-suggestions-item-${index}`} key={index}>
