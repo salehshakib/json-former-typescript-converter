@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -18,6 +19,7 @@ import {
   Type,
   Lightbulb,
   Loader2,
+  CheckCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -27,6 +29,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { OutputFormat } from "@/app/page";
+import type { SuggestionItem } from "@/ai/flows/suggest-improvements"; 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -37,9 +40,10 @@ interface TypeScriptOutputPanelProps {
   isLoading: boolean; // Main conversion loading
   outputFormat: OutputFormat;
   setOutputFormat: Dispatch<SetStateAction<OutputFormat>>;
-  aiSuggestions: string | null;
+  aiSuggestions: SuggestionItem[] | null;
   isFetchingAiSuggestions: boolean;
   onFetchAiSuggestions: () => Promise<void>;
+  onAcceptAiSuggestion: (suggestedCode: string) => void;
 }
 
 export default function TypeScriptOutputPanel({
@@ -52,6 +56,7 @@ export default function TypeScriptOutputPanel({
   aiSuggestions,
   isFetchingAiSuggestions,
   onFetchAiSuggestions,
+  onAcceptAiSuggestion,
 }: TypeScriptOutputPanelProps) {
   const hasTsOutput = tsOutput.trim().length > 0;
 
@@ -109,7 +114,7 @@ export default function TypeScriptOutputPanel({
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <ScrollArea className="border rounded-md bg-muted/30 h-[70vh]">
+        <ScrollArea className="border rounded-md bg-muted/30 h-[80vh]">
           <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
             <code
               className={`${
@@ -125,7 +130,7 @@ export default function TypeScriptOutputPanel({
           </pre>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-4 p-4 border-t">
+      <CardFooter className="flex flex-col items-start gap-4 p-6 pt-2 border-t">
         <Button
           onClick={onFetchAiSuggestions}
           disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
@@ -142,22 +147,36 @@ export default function TypeScriptOutputPanel({
             ? "Thinking..."
             : "Get AI Enhancement Suggestions"}
         </Button>
-        {aiSuggestions && (
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="ai-suggestions">
-              <AccordionTrigger className="text-sm">
-                View AI Enhancement Suggestions
-              </AccordionTrigger>
-              <AccordionContent>
-                <ScrollArea className="h-[200px] p-1 border rounded-md">
-                  <div className="prose prose-sm dark:prose-invert max-w-none p-2 text-sm">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {aiSuggestions}
-                    </ReactMarkdown>
-                  </div>
-                </ScrollArea>
-              </AccordionContent>
-            </AccordionItem>
+        {aiSuggestions && aiSuggestions.length > 0 && (
+          <Accordion type="single" collapsible className="w-full" defaultValue="ai-suggestions-item-0">
+            {aiSuggestions.map((suggestion, index) => (
+              <AccordionItem value={`ai-suggestions-item-${index}`} key={index}>
+                <AccordionTrigger className="text-sm text-left">
+                  Suggestion {index + 1}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ScrollArea className="h-auto max-h-[200px] p-1 border rounded-md">
+                    <div className="prose prose-sm dark:prose-invert max-w-none p-3 text-sm">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {suggestion.description}
+                      </ReactMarkdown>
+                    </div>
+                  </ScrollArea>
+                  {suggestion.isApplicable && suggestion.suggestedCode && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-3 w-full"
+                      onClick={() => onAcceptAiSuggestion(suggestion.suggestedCode!)}
+                      disabled={isFetchingAiSuggestions || isLoading}
+                    >
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Accept Suggestion
+                    </Button>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
           </Accordion>
         )}
       </CardFooter>

@@ -8,7 +8,7 @@ import TypeScriptOutputPanel from "@/components/json-former/typescript-output-pa
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { convertJsonToTs } from "@/lib/json-to-ts";
-import { suggestTypescriptImprovements, type SuggestTypescriptImprovementsOutput } from "@/ai/flows/suggest-improvements";
+import { suggestTypescriptImprovements, type SuggestionItem, type SuggestTypescriptImprovementsOutput } from "@/ai/flows/suggest-improvements";
 
 const EXAMPLE_JSON = {
   user: {
@@ -67,22 +67,18 @@ export default function JsonFormerPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progressValue, setProgressValue] = useState<number>(0);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("interface");
-  const [aiSuggestions, setAiSuggestions] = useState<string | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<SuggestionItem[] | null>(null);
   const [isFetchingAiSuggestions, setIsFetchingAiSuggestions] = useState<boolean>(false);
   const { toast } = useToast();
 
   const handleLoadExampleJson = () => {
     const exampleJsonString = JSON.stringify(EXAMPLE_JSON, null, 2);
     setJsonInput(exampleJsonString);
-    toast({
-      title: "Example JSON Loaded",
-      description: "The sample JSON has been loaded into the input area.",
-    });
   };
 
   const memoizedHandleConvert = useCallback(
     async (currentJsonInput: string, currentOutputFormat: OutputFormat) => {
-      setAiSuggestions(null); // Clear previous AI suggestions
+      setAiSuggestions(null); 
       if (!currentJsonInput.trim()) {
         setTsOutput("");
         setIsLoading(false);
@@ -111,30 +107,23 @@ export default function JsonFormerPage() {
         });
         setTsOutput("");
         setProgressValue(0);
-        setIsLoading(false);
-        return;
-      }
-
-      setTsOutput(conversionResult.typescriptCode);
-
-      if (conversionResult.typescriptCode) {
-        toast({
-          title: "Conversion Successful",
-          description: `JSON has been converted to TypeScript ${
-            currentOutputFormat === "interface" ? "interfaces" : "types"
-          }.`,
-        });
+      } else {
+        setTsOutput(conversionResult.typescriptCode);
       }
       setIsLoading(false);
     },
-    [toast]
+    [toast] 
   );
 
   useEffect(() => {
     const currentInput = jsonInput;
     const currentFormat = outputFormat;
+    
     if (!currentInput.trim()) {
-      memoizedHandleConvert(currentInput, currentFormat);
+      setTsOutput("");
+      setAiSuggestions(null);
+      setIsLoading(false);
+      setProgressValue(0);
       return;
     }
 
@@ -169,20 +158,12 @@ export default function JsonFormerPage() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast({
-      title: "Download Started",
-      description: `${filename} is being downloaded.`,
-    });
   };
 
   const handlePasteJson = async () => {
     try {
       const text = await navigator.clipboard.readText();
       setJsonInput(text);
-      toast({
-        title: "JSON Pasted",
-        description: "Content pasted from clipboard.",
-      });
     } catch (err) {
       console.error("Failed to read clipboard contents: ", err);
       toast({
@@ -206,10 +187,6 @@ export default function JsonFormerPage() {
     try {
       const parsedJson = JSON.parse(jsonInput);
       setJsonInput(JSON.stringify(parsedJson, null, 2));
-      toast({
-        title: "JSON Formatted",
-        description: "The JSON input has been beautified.",
-      });
     } catch (error) {
       toast({
         title: "Format Error",
@@ -221,10 +198,6 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput("");
-    toast({
-      title: "Input Cleared",
-      description: "JSON input has been cleared.",
-    });
   };
 
   const handleCopyTs = async () => {
@@ -238,10 +211,6 @@ export default function JsonFormerPage() {
     }
     try {
       await navigator.clipboard.writeText(tsOutput);
-      toast({
-        title: "Copied to Clipboard",
-        description: "TypeScript code has been copied.",
-      });
     } catch (err) {
       console.error("Failed to copy text: ", err);
       toast({
@@ -268,11 +237,17 @@ export default function JsonFormerPage() {
         typescriptCode: tsOutput,
         jsonInput: jsonInput 
       });
-      setAiSuggestions(result.suggestions);
-       toast({
-        title: "AI Suggestions Ready",
-        description: "Suggestions for your TypeScript code have been generated.",
-      });
+      if (result.suggestions && result.suggestions.length > 0) {
+        // Filter out suggestions that don't have a description or are clearly problematic
+        const validSuggestions = result.suggestions.filter(s => s.description && s.description.trim() !== "");
+        if (validSuggestions.length > 0) {
+            setAiSuggestions(validSuggestions);
+        } else {
+            setAiSuggestions([{ description: "No actionable suggestions found. The AI might have returned empty descriptions or encountered an issue.", isApplicable: false }]);
+        }
+      } else {
+        setAiSuggestions([{ description: "No specific improvements found by the AI or an error occurred.", isApplicable: false }]);
+      }
     } catch (error) {
       console.error("Failed to fetch AI suggestions:", error);
       toast({
@@ -280,10 +255,19 @@ export default function JsonFormerPage() {
         description: "Could not fetch suggestions from the AI. Please try again.",
         variant: "destructive",
       });
-      setAiSuggestions("Failed to load suggestions.");
+      setAiSuggestions([{ description: "Failed to load suggestions due to an error.", isApplicable: false }]);
     } finally {
       setIsFetchingAiSuggestions(false);
     }
+  };
+
+  const handleAcceptAiSuggestion = (suggestedCode: string) => {
+    setTsOutput(suggestedCode);
+    toast({
+      title: "AI Suggestion Applied",
+      description: "The TypeScript output has been updated.",
+    });
+    // setAiSuggestions(null); // Optionally clear suggestions if desired after applying one
   };
 
 
@@ -319,6 +303,7 @@ export default function JsonFormerPage() {
             aiSuggestions={aiSuggestions}
             isFetchingAiSuggestions={isFetchingAiSuggestions}
             onFetchAiSuggestions={handleFetchAiSuggestions}
+            onAcceptAiSuggestion={handleAcceptAiSuggestion}
           />
         </div>
       </main>
