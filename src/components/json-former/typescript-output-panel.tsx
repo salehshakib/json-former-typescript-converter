@@ -83,7 +83,7 @@ export default function TypeScriptOutputPanel({
             TypeScript Output
           </CardTitle>
           <CardDescription>
-            View generated or AI-enhanced TypeScript definitions.
+            Generated TypeScript. Switch to AI view if available.
           </CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -135,7 +135,7 @@ export default function TypeScriptOutputPanel({
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">
-              <p>Copy {activeTsView === 'aiEnhanced' ? "AI Enhanced" : "Current"} Code</p>
+              <p>Copy {activeTsView === 'aiEnhanced' ? "Enhanced" : "Current"} Code</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -151,7 +151,7 @@ export default function TypeScriptOutputPanel({
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">
-              <p>Download {activeTsView === 'aiEnhanced' ? "AI Enhanced" : "Current"} Code</p>
+              <p>Download {activeTsView === 'aiEnhanced' ? "Enhanced" : "Current"} Code</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -165,7 +165,7 @@ export default function TypeScriptOutputPanel({
               onClick={() => setActiveTsView('current')}
               className="flex-1"
             >
-              Current Output
+              Current
             </Button>
             <Button
               variant={activeTsView === 'aiEnhanced' ? 'secondary' : 'ghost'}
@@ -173,7 +173,7 @@ export default function TypeScriptOutputPanel({
               onClick={() => setActiveTsView('aiEnhanced')}
               className="flex-1"
             >
-              AI Enhanced
+              Enhanced
             </Button>
           </div>
         )}
