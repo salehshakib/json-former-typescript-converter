@@ -76,6 +76,7 @@ export default function TypeScriptOutputPanel({
             <FileJson2
               className="h-5 w-5 text-muted-foreground"
               aria-label="Interface format"
+              title="Interface format"
             />
             <Switch
               id="output-format-switch"
@@ -89,6 +90,7 @@ export default function TypeScriptOutputPanel({
             <Type
               className="h-5 w-5 text-muted-foreground"
               aria-label="Type alias format"
+              title="Type alias format"
             />
           </div>
           <Button
@@ -133,7 +135,7 @@ export default function TypeScriptOutputPanel({
       <CardFooter className="flex flex-col items-start gap-4 p-6 pt-2 border-t">
         <Button
           onClick={onFetchAiSuggestions}
-          disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
+          disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput || aiSuggestions !== null}
           size="sm"
           variant="outline"
           className="w-full"
@@ -145,13 +147,13 @@ export default function TypeScriptOutputPanel({
           )}
           {isFetchingAiSuggestions
             ? "Thinking..."
-            : "Get AI Enhancement Suggestions"}
+            : aiSuggestions !== null ? "Suggestions Loaded" : "Get AI Enhancement Suggestions"}
         </Button>
         {aiSuggestions && aiSuggestions.length > 0 && (
           <Accordion type="single" collapsible className="w-full" defaultValue="ai-suggestions-item-0">
             {aiSuggestions.map((suggestion, index) => (
               <AccordionItem value={`ai-suggestions-item-${index}`} key={index}>
-                <AccordionTrigger className="text-sm text-left">
+                <AccordionTrigger className="text-sm text-left hover:no-underline">
                   Suggestion {index + 1}
                 </AccordionTrigger>
                 <AccordionContent>
