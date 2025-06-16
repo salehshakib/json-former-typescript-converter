@@ -138,6 +138,7 @@ export default function JsonFormerPage() {
       return;
     }
     
+    // Clear AI-related states when input changes before new conversion
     setAcceptedAiSuggestionCode(null);
     setAiSuggestions(null);
     setActiveTsView("current");
@@ -152,29 +153,6 @@ export default function JsonFormerPage() {
     };
   }, [jsonInput, outputFormat, memoizedHandleConvert]);
 
-  const handleDownloadTs = () => {
-    if (!tsOutput.trim()) {
-      toast({
-        title: "Download Error",
-        description: "No TypeScript code to download.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const blob = new Blob([tsOutput], {
-      type: "text/typescript;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const filename =
-      outputFormat === "interface" ? "interfaces.ts" : "types.ts";
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   const handlePasteJson = async () => {
     try {
@@ -206,9 +184,8 @@ export default function JsonFormerPage() {
     try {
       const parsedJson = JSON.parse(jsonInput);
       setJsonInput(JSON.stringify(parsedJson, null, 2));
-      setAcceptedAiSuggestionCode(null);
-      setAiSuggestions(null);
-      setActiveTsView("current");
+      // No need to reset AI states here as the underlying data for conversion hasn't changed its structure.
+      // The useEffect for jsonInput will trigger a re-conversion, which will clear AI states.
     } catch (error) {
       toast({
         title: "Format Error",
@@ -220,6 +197,7 @@ export default function JsonFormerPage() {
 
   const handleClearJson = () => {
     setJsonInput("");
+    // setTsOutput(""); // This will be handled by useEffect
     setAcceptedAiSuggestionCode(null);
     setAiSuggestions(null);
     setActiveTsView("current");
@@ -297,16 +275,19 @@ export default function JsonFormerPage() {
     try {
       const result: SuggestTypescriptImprovementsOutput = await suggestTypescriptImprovements({ 
         typescriptCode: tsOutput,
-        jsonInput: jsonInput 
+        jsonInput: jsonInput // Provide original JSON for context
       });
       if (result.suggestions && result.suggestions.length > 0) {
+        // Filter out suggestions that might be empty or problematic
         const validSuggestions = result.suggestions.filter(s => s.description && s.description.trim() !== "");
         if (validSuggestions.length > 0) {
             setAiSuggestions(validSuggestions);
         } else {
+            // Case where AI returns an array but items are not usable
             setAiSuggestions([{ description: "No actionable suggestions found. The AI might have returned empty descriptions or encountered an issue.", isApplicable: false }]);
         }
       } else {
+        // Case where AI returns an empty array or suggestions field is missing/null
         setAiSuggestions([{ description: "No specific improvements found by the AI or an error occurred.", isApplicable: false }]);
       }
     } catch (error) {
@@ -316,19 +297,20 @@ export default function JsonFormerPage() {
         description: "Could not fetch suggestions from the AI. Please try again.",
         variant: "destructive",
       });
-      setAiSuggestions([{ description: "Failed to load suggestions due to an error.", isApplicable: false }]);
+      setAiSuggestions([{ description: "Failed to load suggestions due to an error.", isApplicable: false }]); // Provide some feedback
     } finally {
       setIsFetchingAiSuggestions(false);
     }
   };
 
   const handleAcceptAiSuggestion = (suggestedCode: string) => {
-    setTsOutput(suggestedCode);
+    // DO NOT update tsOutput here. tsOutput should reflect the original conversion.
+    // setTsOutput(suggestedCode); 
     setAcceptedAiSuggestionCode(suggestedCode);
     setActiveTsView("aiEnhanced");
     toast({
       title: "AI Suggestion Applied",
-      description: "The TypeScript output has been updated. View in 'AI Enhanced' view.",
+      description: "The TypeScript output has been updated. View in 'Enhanced' view.",
     });
   };
 
@@ -357,8 +339,8 @@ export default function JsonFormerPage() {
           <div className="w-full md:w-1/2 flex flex-col">
             <TypeScriptOutputPanel
               tsOutput={tsOutput}
-              onDownloadTs={handleDownloadFile}
-              onCopyTs={handleCopyTs}
+              onDownloadTs={handleDownloadFile} // This will be the generic download, panel will decide what to download
+              onCopyTs={handleCopyTs} // Generic copy
               isLoading={isLoading}
               outputFormat={outputFormat}
               setOutputFormat={setOutputFormat}
