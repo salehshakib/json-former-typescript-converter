@@ -108,7 +108,7 @@ export default function TypeScriptOutputPanel({
           </pre>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-2 pt-2 border-t">
+      <CardFooter className="flex flex-col items-start gap-2 px-4 pt-2 pb-4 border-t">
          <Button
             onClick={onFetchAiSuggestions}
             disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
