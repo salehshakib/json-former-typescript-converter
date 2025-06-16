@@ -38,7 +38,7 @@ export default function JsonInputPanel({
 }: JsonInputPanelProps) {
   return (
     <Card className="flex flex-1 min-h-[70vh] flex-col shadow-lg rounded-xl overflow-hidden h-full">
-      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+      <CardHeader className="flex flex-row md:flex-col lg:flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">JSON Input</CardTitle>
           <CardDescription>Paste, type, or load example JSON.</CardDescription>

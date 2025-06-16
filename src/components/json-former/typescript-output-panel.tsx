@@ -80,7 +80,7 @@ export default function TypeScriptOutputPanel({
 
   return (
     <Card className="flex h-[80vh] flex-col shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className="flex flex-row items-start justify-between gap-2 pb-3">
+      <CardHeader className="flex flex-row md:flex-col lg:flex-row items-start justify-between gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">
             TypeScript Output
