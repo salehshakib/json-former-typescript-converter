@@ -28,13 +28,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import type { OutputFormat } from "@/app/page";
+import type { OutputFormat, ActiveTsView } from "@/app/page";
 import type { SuggestionItem } from "@/ai/flows/suggest-improvements";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -46,9 +40,9 @@ import {
 
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
-  onDownloadCurrentTs: () => void;
-  onCopyCurrentTs: () => void;
-  isLoading: boolean; // Main conversion loading
+  onDownloadTs: () => void;
+  onCopyTs: () => void;
+  isLoading: boolean;
   outputFormat: OutputFormat;
   setOutputFormat: Dispatch<SetStateAction<OutputFormat>>;
   aiSuggestions: SuggestionItem[] | null;
@@ -56,14 +50,14 @@ interface TypeScriptOutputPanelProps {
   onFetchAiSuggestions: () => Promise<void>;
   onAcceptAiSuggestion: (suggestedCode: string) => void;
   acceptedAiSuggestionCode: string | null;
-  onCopyAiSuggestedTs: () => void;
-  onDownloadAiSuggestedTs: () => void;
+  activeTsView: ActiveTsView;
+  setActiveTsView: Dispatch<SetStateAction<ActiveTsView>>;
 }
 
 export default function TypeScriptOutputPanel({
   tsOutput,
-  onDownloadCurrentTs,
-  onCopyCurrentTs,
+  onDownloadTs,
+  onCopyTs,
   isLoading,
   outputFormat,
   setOutputFormat,
@@ -72,17 +66,18 @@ export default function TypeScriptOutputPanel({
   onFetchAiSuggestions,
   onAcceptAiSuggestion,
   acceptedAiSuggestionCode,
-  onCopyAiSuggestedTs,
-  onDownloadAiSuggestedTs,
+  activeTsView,
+  setActiveTsView,
 }: TypeScriptOutputPanelProps) {
   const hasTsOutput = tsOutput.trim().length > 0;
   const hasAcceptedAiSuggestion = acceptedAiSuggestionCode && acceptedAiSuggestionCode.trim().length > 0;
 
-  const currentTabCount = hasAcceptedAiSuggestion ? 2 : 1;
+  const codeToDisplay = activeTsView === 'aiEnhanced' && hasAcceptedAiSuggestion ? acceptedAiSuggestionCode : tsOutput;
+  const displayHasContent = codeToDisplay && codeToDisplay.trim().length > 0;
 
   return (
     <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden h-full">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">
             TypeScript Output
@@ -91,149 +86,112 @@ export default function TypeScriptOutputPanel({
             View generated or AI-enhanced TypeScript definitions.
           </CardDescription>
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+           {activeTsView === 'current' && (
+            <div className="flex items-center space-x-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <FileJson2
+                    className="h-5 w-5 text-muted-foreground"
+                    aria-label="Interface format"
+                  />
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  <p>Interface</p>
+                </TooltipContent>
+              </Tooltip>
+              <Switch
+                id="output-format-switch"
+                checked={outputFormat === "type"}
+                onCheckedChange={(checked) =>
+                  setOutputFormat(checked ? "type" : "interface")
+                }
+                aria-label="Toggle output format between Interface (off) and Type (on)"
+                disabled={isLoading || isFetchingAiSuggestions || activeTsView !== 'current'}
+              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Type
+                    className="h-5 w-5 text-muted-foreground"
+                    aria-label="Type alias format"
+                  />
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">
+                  <p>Type Alias</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onCopyTs}
+                disabled={isLoading || isFetchingAiSuggestions || !displayHasContent}
+                aria-label="Copy TypeScript code"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs">
+              <p>Copy {activeTsView === 'aiEnhanced' ? "AI Enhanced" : "Current"} Code</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onDownloadTs}
+                disabled={isLoading || isFetchingAiSuggestions || !displayHasContent}
+                aria-label="Download TypeScript file"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs">
+              <p>Download {activeTsView === 'aiEnhanced' ? "AI Enhanced" : "Current"} Code</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
-        <Tabs defaultValue="current-output" className="w-full flex-1 flex flex-col min-h-0">
-          <TabsList className={`grid w-full ${currentTabCount === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <TabsTrigger value="current-output">Current Output</TabsTrigger>
-            {hasAcceptedAiSuggestion && (
-              <TabsTrigger value="ai-enhanced">AI Enhanced</TabsTrigger>
-            )}
-          </TabsList>
-          
-          <TabsContent value="current-output" className="flex-1 flex flex-col min-h-0 mt-2">
-            <div className="flex items-center justify-between gap-2 py-2 mb-2">
-              <div className="flex items-center space-x-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <FileJson2
-                      className="h-5 w-5 text-muted-foreground"
-                      aria-label="Interface format"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    <p>Interface</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Switch
-                  id="output-format-switch"
-                  checked={outputFormat === "type"}
-                  onCheckedChange={(checked) =>
-                    setOutputFormat(checked ? "type" : "interface")
-                  }
-                  aria-label="Toggle output format between Interface (off) and Type (on)"
-                  disabled={isLoading || isFetchingAiSuggestions}
-                />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Type
-                      className="h-5 w-5 text-muted-foreground"
-                      aria-label="Type alias format"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    <p>Type Alias</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onCopyCurrentTs}
-                      disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
-                      aria-label="Copy TypeScript code"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    <p>Copy TypeScript</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onDownloadCurrentTs}
-                      disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
-                      aria-label="Download TypeScript file"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    <p>Download TypeScript</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-            <ScrollArea className="border rounded-md bg-muted/30 flex-1">
-              <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
-                <code
-                  className={`${
-                    !hasTsOutput && !isLoading ? "text-muted-foreground" : ""
-                  } h-full block`}
-                >
-                  {isLoading && !hasTsOutput
-                    ? "Generating TypeScript..."
-                    : hasTsOutput
-                    ? tsOutput
-                    : "Your TypeScript code will appear here..."}
-                </code>
-              </pre>
-            </ScrollArea>
-          </TabsContent>
-
-          {hasAcceptedAiSuggestion && (
-            <TabsContent value="ai-enhanced" className="flex-1 flex flex-col min-h-0 mt-2">
-               <div className="flex items-center justify-end gap-2 py-2 mb-2"> {/* No format switch needed here */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onCopyAiSuggestedTs}
-                      disabled={isLoading || isFetchingAiSuggestions}
-                      aria-label="Copy AI Enhanced TypeScript code"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    <p>Copy AI Enhanced Code</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onDownloadAiSuggestedTs}
-                      disabled={isLoading || isFetchingAiSuggestions}
-                      aria-label="Download AI Enhanced TypeScript file"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    <p>Download AI Enhanced Code</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <ScrollArea className="border rounded-md bg-muted/30 flex-1">
-                <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
-                  <code className="h-full block">
-                    {acceptedAiSuggestionCode}
-                  </code>
-                </pre>
-              </ScrollArea>
-            </TabsContent>
-          )}
-        </Tabs>
+        {hasAcceptedAiSuggestion && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant={activeTsView === 'current' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTsView('current')}
+              className="flex-1"
+            >
+              Current Output
+            </Button>
+            <Button
+              variant={activeTsView === 'aiEnhanced' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTsView('aiEnhanced')}
+              className="flex-1"
+            >
+              AI Enhanced
+            </Button>
+          </div>
+        )}
+        <ScrollArea className="border rounded-md bg-muted/30 flex-1 min-h-[200px] h-[80vh]">
+          <pre className="p-3 text-sm whitespace-pre-wrap break-all font-code text-foreground h-full">
+            <code
+              className={`${
+                !displayHasContent && !isLoading ? "text-muted-foreground" : ""
+              } h-full block`}
+            >
+              {isLoading && !displayHasContent
+                ? "Generating TypeScript..."
+                : displayHasContent
+                ? codeToDisplay
+                : "Your TypeScript code will appear here..."}
+            </code>
+          </pre>
+        </ScrollArea>
       </CardContent>
       <CardFooter className="flex flex-col items-start gap-4 p-4 border-t">
         <Button

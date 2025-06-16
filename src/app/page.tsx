@@ -61,6 +61,7 @@ const EXAMPLE_JSON = {
 };
 
 export type OutputFormat = "interface" | "type";
+export type ActiveTsView = "current" | "aiEnhanced";
 
 export default function JsonFormerPage() {
   const [jsonInput, setJsonInput] = useState<string>("");
@@ -71,6 +72,7 @@ export default function JsonFormerPage() {
   const [aiSuggestions, setAiSuggestions] = useState<SuggestionItem[] | null>(null);
   const [isFetchingAiSuggestions, setIsFetchingAiSuggestions] = useState<boolean>(false);
   const [acceptedAiSuggestionCode, setAcceptedAiSuggestionCode] = useState<string | null>(null);
+  const [activeTsView, setActiveTsView] = useState<ActiveTsView>("current");
   const { toast } = useToast();
 
   const handleLoadExampleJson = () => {
@@ -78,12 +80,14 @@ export default function JsonFormerPage() {
     setJsonInput(exampleJsonString);
     setAcceptedAiSuggestionCode(null);
     setAiSuggestions(null);
+    setActiveTsView("current");
   };
 
   const memoizedHandleConvert = useCallback(
     async (currentJsonInput: string, currentOutputFormat: OutputFormat) => {
       setAiSuggestions(null); 
       setAcceptedAiSuggestionCode(null);
+      setActiveTsView("current");
       if (!currentJsonInput.trim()) {
         setTsOutput("");
         setIsLoading(false);
@@ -128,14 +132,15 @@ export default function JsonFormerPage() {
       setTsOutput("");
       setAiSuggestions(null);
       setAcceptedAiSuggestionCode(null);
+      setActiveTsView("current");
       setIsLoading(false);
       setProgressValue(0);
       return;
     }
     
-    // Clear accepted AI suggestion when input changes before new conversion
     setAcceptedAiSuggestionCode(null);
     setAiSuggestions(null);
+    setActiveTsView("current");
 
 
     const handler = setTimeout(() => {
@@ -177,6 +182,7 @@ export default function JsonFormerPage() {
       setJsonInput(text);
       setAcceptedAiSuggestionCode(null);
       setAiSuggestions(null);
+      setActiveTsView("current");
     } catch (err) {
       console.error("Failed to read clipboard contents: ", err);
       toast({
@@ -202,6 +208,7 @@ export default function JsonFormerPage() {
       setJsonInput(JSON.stringify(parsedJson, null, 2));
       setAcceptedAiSuggestionCode(null);
       setAiSuggestions(null);
+      setActiveTsView("current");
     } catch (error) {
       toast({
         title: "Format Error",
@@ -215,10 +222,12 @@ export default function JsonFormerPage() {
     setJsonInput("");
     setAcceptedAiSuggestionCode(null);
     setAiSuggestions(null);
+    setActiveTsView("current");
   };
 
   const handleCopyTs = async () => {
-    if (!tsOutput.trim()) {
+    const codeToCopy = activeTsView === 'aiEnhanced' && acceptedAiSuggestionCode ? acceptedAiSuggestionCode : tsOutput;
+    if (!codeToCopy.trim()) {
       toast({
         title: "Copy Error",
         description: "No TypeScript code to copy.",
@@ -227,10 +236,10 @@ export default function JsonFormerPage() {
       return;
     }
     try {
-      await navigator.clipboard.writeText(tsOutput);
+      await navigator.clipboard.writeText(codeToCopy);
       toast({
         title: "Copied!",
-        description: "Current TypeScript output copied to clipboard.",
+        description: `TypeScript (${activeTsView === 'aiEnhanced' ? 'AI Enhanced' : 'Current'}) copied to clipboard.`,
       });
     } catch (err) {
       console.error("Failed to copy text: ", err);
@@ -241,6 +250,38 @@ export default function JsonFormerPage() {
       });
     }
   };
+  
+  const handleDownloadFile = () => {
+    const codeToDownload = activeTsView === 'aiEnhanced' && acceptedAiSuggestionCode ? acceptedAiSuggestionCode : tsOutput;
+    const defaultFilename = activeTsView === 'aiEnhanced' 
+      ? "ai-enhanced.ts" 
+      : (outputFormat === "interface" ? "interfaces.ts" : "types.ts");
+
+    if (!codeToDownload.trim()) {
+      toast({
+        title: "Download Error",
+        description: "No TypeScript code to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const blob = new Blob([codeToDownload], {
+      type: "text/typescript;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = defaultFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Downloaded!",
+      description: `TypeScript file (${defaultFilename}) downloaded.`,
+    });
+  };
+
 
   const handleFetchAiSuggestions = async () => {
     if (!tsOutput.trim()) {
@@ -252,7 +293,7 @@ export default function JsonFormerPage() {
       return;
     }
     setIsFetchingAiSuggestions(true);
-    setAiSuggestions(null); // Clear previous suggestions before fetching new ones
+    setAiSuggestions(null); 
     try {
       const result: SuggestTypescriptImprovementsOutput = await suggestTypescriptImprovements({ 
         typescriptCode: tsOutput,
@@ -284,63 +325,12 @@ export default function JsonFormerPage() {
   const handleAcceptAiSuggestion = (suggestedCode: string) => {
     setTsOutput(suggestedCode);
     setAcceptedAiSuggestionCode(suggestedCode);
+    setActiveTsView("aiEnhanced");
     toast({
       title: "AI Suggestion Applied",
-      description: "The TypeScript output has been updated. View in 'Current Output' or 'AI Enhanced' tab.",
+      description: "The TypeScript output has been updated. View in 'AI Enhanced' view.",
     });
   };
-
-  const handleCopyAiSuggestedTs = async () => {
-    if (!acceptedAiSuggestionCode || !acceptedAiSuggestionCode.trim()) {
-      toast({
-        title: "Copy Error",
-        description: "No AI enhanced TypeScript code to copy.",
-        variant: "destructive",
-      });
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(acceptedAiSuggestionCode);
-      toast({
-        title: "Copied!",
-        description: "AI enhanced TypeScript copied to clipboard.",
-      });
-    } catch (err) {
-      console.error("Failed to copy AI enhanced text: ", err);
-      toast({
-        title: "Copy Error",
-        description: "Could not copy AI enhanced code to clipboard.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDownloadAiSuggestedTs = () => {
-    if (!acceptedAiSuggestionCode || !acceptedAiSuggestionCode.trim()) {
-      toast({
-        title: "Download Error",
-        description: "No AI enhanced TypeScript code to download.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const blob = new Blob([acceptedAiSuggestionCode], {
-      type: "text/typescript;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "ai-enhanced.ts";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast({
-      title: "Downloaded!",
-      description: "AI enhanced TypeScript file downloaded.",
-    });
-  };
-
 
   return (
     <TooltipProvider>
@@ -367,8 +357,8 @@ export default function JsonFormerPage() {
           <div className="w-full md:w-1/2 flex flex-col">
             <TypeScriptOutputPanel
               tsOutput={tsOutput}
-              onDownloadCurrentTs={handleDownloadTs}
-              onCopyCurrentTs={handleCopyTs}
+              onDownloadTs={handleDownloadFile}
+              onCopyTs={handleCopyTs}
               isLoading={isLoading}
               outputFormat={outputFormat}
               setOutputFormat={setOutputFormat}
@@ -377,8 +367,8 @@ export default function JsonFormerPage() {
               onFetchAiSuggestions={handleFetchAiSuggestions}
               onAcceptAiSuggestion={handleAcceptAiSuggestion}
               acceptedAiSuggestionCode={acceptedAiSuggestionCode}
-              onCopyAiSuggestedTs={handleCopyAiSuggestedTs}
-              onDownloadAiSuggestedTs={handleDownloadAiSuggestedTs}
+              activeTsView={activeTsView}
+              setActiveTsView={setActiveTsView}
             />
           </div>
         </main>
