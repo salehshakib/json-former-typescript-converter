@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -12,12 +11,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Copy, Download, FileJson2, Type, Lightbulb, Loader2 } from "lucide-react";
+import {
+  Copy,
+  Download,
+  FileJson2,
+  Type,
+  Lightbulb,
+  Loader2,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type { OutputFormat } from "@/app/page";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface TypeScriptOutputPanelProps {
   tsOutput: string;
@@ -57,7 +68,10 @@ export default function TypeScriptOutputPanel({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center space-x-2 mr-2">
-            <FileJson2 className="h-5 w-5 text-muted-foreground" aria-label="Interface format" title="Interface" />
+            <FileJson2
+              className="h-5 w-5 text-muted-foreground"
+              aria-label="Interface format"
+            />
             <Switch
               id="output-format-switch"
               checked={outputFormat === "type"}
@@ -67,7 +81,10 @@ export default function TypeScriptOutputPanel({
               aria-label="Toggle output format between Interface (off) and Type (on)"
               disabled={isLoading || isFetchingAiSuggestions}
             />
-            <Type className="h-5 w-5 text-muted-foreground" aria-label="Type alias format" title="Type Alias"/>
+            <Type
+              className="h-5 w-5 text-muted-foreground"
+              aria-label="Type alias format"
+            />
           </div>
           <Button
             variant="outline"
@@ -108,29 +125,35 @@ export default function TypeScriptOutputPanel({
           </pre>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-4 p-6 pt-2 border-t">
-         <Button
-            onClick={onFetchAiSuggestions}
-            disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
-            size="sm"
-            variant="outline"
-            className="w-full"
-          >
-            {isFetchingAiSuggestions ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Lightbulb className="mr-2 h-4 w-4" />
-            )}
-            {isFetchingAiSuggestions ? "Thinking..." : "Get AI Enhancement Suggestions"}
-          </Button>
+      <CardFooter className="flex flex-col items-start gap-4 p-4 border-t">
+        <Button
+          onClick={onFetchAiSuggestions}
+          disabled={isLoading || isFetchingAiSuggestions || !hasTsOutput}
+          size="sm"
+          variant="outline"
+          className="w-full"
+        >
+          {isFetchingAiSuggestions ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Lightbulb className="mr-2 h-4 w-4" />
+          )}
+          {isFetchingAiSuggestions
+            ? "Thinking..."
+            : "Get AI Enhancement Suggestions"}
+        </Button>
         {aiSuggestions && (
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="ai-suggestions">
-              <AccordionTrigger className="text-sm">View AI Enhancement Suggestions</AccordionTrigger>
+              <AccordionTrigger className="text-sm">
+                View AI Enhancement Suggestions
+              </AccordionTrigger>
               <AccordionContent>
                 <ScrollArea className="h-[200px] p-1 border rounded-md">
-                  <div className="prose prose-sm dark:prose-invert max-w-none p-2 text-xs">
-                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiSuggestions}</ReactMarkdown>
+                  <div className="prose prose-sm dark:prose-invert max-w-none p-2 text-sm">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {aiSuggestions}
+                    </ReactMarkdown>
                   </div>
                 </ScrollArea>
               </AccordionContent>
