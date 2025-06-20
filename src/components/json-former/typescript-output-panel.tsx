@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -71,16 +70,21 @@ export default function TypeScriptOutputPanel({
   setActiveTsView,
 }: TypeScriptOutputPanelProps) {
   const hasTsOutput = tsOutput.trim().length > 0;
-  const hasAcceptedAiSuggestion = acceptedAiSuggestionCode && acceptedAiSuggestionCode.trim().length > 0;
+  const hasAcceptedAiSuggestion =
+    acceptedAiSuggestionCode && acceptedAiSuggestionCode.trim().length > 0;
 
-  const codeToDisplay = activeTsView === 'aiEnhanced' && hasAcceptedAiSuggestion ? acceptedAiSuggestionCode : tsOutput;
+  const codeToDisplay =
+    activeTsView === "aiEnhanced" && hasAcceptedAiSuggestion
+      ? acceptedAiSuggestionCode
+      : tsOutput;
   const displayHasContent = codeToDisplay && codeToDisplay.trim().length > 0;
 
-  const isFormatSwitchDisabled = isLoading || isFetchingAiSuggestions || activeTsView !== 'current';
+  const isFormatSwitchDisabled =
+    isLoading || isFetchingAiSuggestions || activeTsView !== "current";
 
   return (
-    <Card className="flex h-[80vh] flex-col shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className="flex flex-row md:flex-col lg:flex-row items-start justify-between gap-2">
+    <Card className="flex h-[120vh] lg:h-[80vh] flex-col shadow-lg rounded-xl overflow-hidden">
+      <CardHeader className="flex flex-col lg:flex-row items-start justify-between gap-2">
         <div>
           <CardTitle className="text-2xl font-headline">
             TypeScript Output
@@ -90,12 +94,17 @@ export default function TypeScriptOutputPanel({
           </CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-           {activeTsView === 'current' && (
+          {activeTsView === "current" && (
             <div className="flex items-center space-x-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <FileJson2
-                    className={cn("h-5 w-5", isFormatSwitchDisabled ? "text-muted-foreground/50" : "text-muted-foreground")}
+                    className={cn(
+                      "h-5 w-5",
+                      isFormatSwitchDisabled
+                        ? "text-muted-foreground/50"
+                        : "text-muted-foreground"
+                    )}
                     aria-label="Interface format"
                   />
                 </TooltipTrigger>
@@ -115,7 +124,12 @@ export default function TypeScriptOutputPanel({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Type
-                     className={cn("h-5 w-5", isFormatSwitchDisabled ? "text-muted-foreground/50" : "text-muted-foreground")}
+                    className={cn(
+                      "h-5 w-5",
+                      isFormatSwitchDisabled
+                        ? "text-muted-foreground/50"
+                        : "text-muted-foreground"
+                    )}
                     aria-label="Type alias format"
                   />
                 </TooltipTrigger>
@@ -131,14 +145,22 @@ export default function TypeScriptOutputPanel({
                 variant="outline"
                 size="icon"
                 onClick={onCopyTs}
-                disabled={isLoading || isFetchingAiSuggestions || !displayHasContent}
+                disabled={
+                  isLoading || isFetchingAiSuggestions || !displayHasContent
+                }
                 aria-label="Copy TypeScript code"
               >
                 <Copy className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">
-              <p>Copy {activeTsView === 'aiEnhanced' && hasAcceptedAiSuggestion ? "Enhanced" : "Current"} Code</p>
+              <p>
+                Copy{" "}
+                {activeTsView === "aiEnhanced" && hasAcceptedAiSuggestion
+                  ? "Enhanced"
+                  : "Current"}{" "}
+                Code
+              </p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -147,28 +169,36 @@ export default function TypeScriptOutputPanel({
                 variant="outline"
                 size="icon"
                 onClick={onDownloadTs}
-                disabled={isLoading || isFetchingAiSuggestions || !displayHasContent}
+                disabled={
+                  isLoading || isFetchingAiSuggestions || !displayHasContent
+                }
                 aria-label="Download TypeScript file"
               >
                 <Download className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">
-              <p>Download {activeTsView === 'aiEnhanced' && hasAcceptedAiSuggestion ? "Enhanced" : "Current"} Code</p>
+              <p>
+                Download{" "}
+                {activeTsView === "aiEnhanced" && hasAcceptedAiSuggestion
+                  ? "Enhanced"
+                  : "Current"}{" "}
+                Code
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 p-4 pt-0 min-h-0">
         {hasAcceptedAiSuggestion && (
-           <div className="flex items-center p-1 bg-muted rounded-lg ">
+          <div className="flex items-center p-1 bg-muted rounded-lg ">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setActiveTsView('current')}
+              onClick={() => setActiveTsView("current")}
               className={cn(
                 "flex-1 rounded-md transition-colors duration-150 ease-in-out",
-                activeTsView === 'current'
+                activeTsView === "current"
                   ? "bg-background text-foreground shadow font-semibold"
                   : "text-muted-foreground hover:text-foreground font-medium"
               )}
@@ -178,10 +208,10 @@ export default function TypeScriptOutputPanel({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setActiveTsView('aiEnhanced')}
+              onClick={() => setActiveTsView("aiEnhanced")}
               className={cn(
                 "flex-1 rounded-md transition-colors duration-150 ease-in-out",
-                activeTsView === 'aiEnhanced'
+                activeTsView === "aiEnhanced"
                   ? "bg-background text-foreground shadow font-semibold"
                   : "text-muted-foreground hover:text-foreground font-medium"
               )}
@@ -212,8 +242,8 @@ export default function TypeScriptOutputPanel({
           disabled={
             isLoading ||
             isFetchingAiSuggestions ||
-            !hasTsOutput || 
-            aiSuggestions !== null 
+            !hasTsOutput ||
+            aiSuggestions !== null
           }
           size="sm"
           variant="outline"
@@ -273,4 +303,3 @@ export default function TypeScriptOutputPanel({
     </Card>
   );
 }
-
